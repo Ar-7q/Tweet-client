@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Inter } from "next/font/google";
 import Providers from "./providers";
+import { Toaster } from "react-hot-toast";
 // import { GoogleOAuthProvider } from "@react-oauth/google";
 // import Providers from "./providers";
 
@@ -12,9 +13,9 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Koo",
   description: "Blogging Shairng next app",
-  icons:{
-    icon:'/amy.png'
-  }
+  icons: {
+    icon: "/amy.png",
+  },
 };
 
 export default function RootLayout({
@@ -23,12 +24,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className="h-full antialiased"
-    >
+    <html lang="en" className="h-full antialiased">
       <body className={`${inter.className} min-h-full flex flex-col`}>
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );

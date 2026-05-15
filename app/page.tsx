@@ -1,10 +1,13 @@
 "use client";
+import { graphqlClient } from "@/clients/api";
 import FeedCard from "@/components/FeedCard/page";
+import { verifyGoogleTokenQuery } from "@/graphql/query/user";
 
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 import { log } from "console";
 import Image from "next/image";
 import React, { useCallback } from "react";
+import toast from "react-hot-toast";
 import { BiHash, BiHomeCircle, BiMoney, BiSolidUser, BiUserCheck, BiUserCircle, BiUserX } from "react-icons/bi";
 import { BsBellSlash, BsBookmarkCheckFill, BsBookmarkHeart, BsEnvelopeArrowUpFill, BsEnvelopeAt, BsEnvelopeDash, BsFillBellFill, BsFillEnvelopeDashFill } from "react-icons/bs";
 import { CgOptions } from "react-icons/cg";
@@ -48,7 +51,25 @@ const sidebarMenuItems: TwitterSidebarButton[] = [
 
 export default function Home() {
 
-  const handleLoginwithGoogle = useCallback((cred: CredentialResponse) => { }, [])
+  
+  const handleLoginwithGoogle = useCallback(async (cred: CredentialResponse) => { 
+    const googleToken = cred.credential
+    if(!googleToken) return toast.error(`Google token not found`)
+
+      const {verifyGoogleToken}=await graphqlClient.request(
+        verifyGoogleTokenQuery,
+        {token:googleToken}
+      )
+
+      toast.success(`Verified Success`)
+      console.log(verifyGoogleToken);
+      if(verifyGoogleToken) {
+        window.localStorage.setItem("_tweet_token",verifyGoogleToken)
+      }
+
+      
+
+  }, [])
 
   return (
     <div>
@@ -121,7 +142,7 @@ border-l border-r border-gray-700">
 
 
 
-            <GoogleLogin onSuccess={(cred) => console.log(cred)
+            <GoogleLogin onSuccess={handleLoginwithGoogle
             } />
           </div>
         </div>
