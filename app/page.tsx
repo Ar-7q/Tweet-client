@@ -12,6 +12,7 @@ import toast from "react-hot-toast";
 import {
   BiHash,
   BiHomeCircle,
+  BiImageAdd,
   BiMoney,
   BiSolidUser,
   BiUserCheck,
@@ -77,7 +78,14 @@ const sidebarMenuItems: TwitterSidebarButton[] = [
 export default function Home() {
   const { user } = useCurrentUser();
   const queryClient = useQueryClient();
-  console.log(user);
+  // console.log(user);
+
+  const handleSelectImage=useCallback(()=>{
+    const input =document.createElement('input')
+    input.setAttribute('type','file')
+    input.setAttribute('accept','image/*')
+    input.click()
+  },[])
 
   const handleLoginwithGoogle = useCallback(
     async (cred: CredentialResponse) => {
@@ -332,6 +340,38 @@ scroll-smooth
 w-full
 border-l border-r border-gray-700"
         >
+          <div>
+            <div className="border border-r-0 border-l-0 bordeer-b-0 border-gray-600 p-5 hover:bg-slate-900 transition-all cursor-pointer">
+              <div className="grid grid-cols-12 gap-2 md:gap-3">
+                <div className="col-span-2 sm:col-span-1">
+                  {user?.profileImageUrl && (
+                    <Image
+                      src={user?.profileImageUrl}
+                      alt="user-image"
+                      className="rounded-full"
+                      height={50}
+                      width={50}
+                    />
+                  )}
+                </div>
+                <div className="col-span-11">
+                  <textarea
+                    className=" w-full bg-transparent text-xl px-3 border-b border-slate-600"
+                    placeholder="What's the Mood?"
+                    rows={4}
+                  ></textarea>
+
+                  <div className="mt-2 flex justify-between items-center">
+                    <BiImageAdd onClick={handleSelectImage} className="text-xl" />
+                    <button className="bg-blue-300 text-black font-extrabold text-sm py-2 px-4 rounded-full cursor-pointer">
+                      Too. 🌞
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <FeedCard />
           <FeedCard />
           <FeedCard />
