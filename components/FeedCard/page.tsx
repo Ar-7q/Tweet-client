@@ -115,6 +115,28 @@ overflow-hidden
               {data?.content}
             </p>
 
+            {data?.imageURL && (
+              <div className="mt-4">
+                <Image
+                  src={data.imageURL}
+                  alt="tweet-image"
+                  width={700}
+                  height={700}
+                  className="
+        rounded-2xl
+
+        w-full
+
+        max-h-[500px]
+
+        object-cover
+
+        border border-slate-700
+      "
+                />
+              </div>
+            )}
+
             <div
               className="
 flex items-center justify-between

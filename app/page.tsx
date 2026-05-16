@@ -1,37 +1,128 @@
 "use client";
 
+import { graphqlClient } from "@/clients/api";
 import TwitterLayout from "@/components/FeedCard/Layout/TwitterLayout";
 import FeedCard from "@/components/FeedCard/page";
+import { uploadImageMutation } from "@/graphql/mutation/tweet";
 
 import { useCreateTweet, useGetAllTweets } from "@/hooks/tweet";
 import { useCurrentUser } from "@/hooks/user";
+import imageCompression from "browser-image-compression";
 
 import Image from "next/image";
 
 import React, { useCallback, useState } from "react";
+import toast from "react-hot-toast";
 import { BiImageAdd } from "react-icons/bi";
 
 export default function Home() {
   const { user } = useCurrentUser();
-  const { tweets = [],isLoading } = useGetAllTweets();
+  const { tweets = [], isLoading } = useGetAllTweets();
   const { mutate } = useCreateTweet();
 
   // console.log(user);
 
   const [content, setContent] = useState("");
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+
+  const [previewImage, setPreviewImage] = useState("");
 
   const handleSelectImage = useCallback(() => {
     const input = document.createElement("input");
+
     input.setAttribute("type", "file");
+
     input.setAttribute("accept", "image/*");
+
+    input.onchange = (event: any) => {
+      const file = event.target.files?.[0];
+
+      if (file) {
+        const maxSizeInMB = 5;
+
+        const fileSizeInMB = file.size / (1024 * 1024);
+
+        if (fileSizeInMB > maxSizeInMB) {
+          toast.error("Image size should be less than 5 MB");
+
+          return;
+        }
+
+        setSelectedImage(file);
+
+        const imageUrl = URL.createObjectURL(file);
+
+        setPreviewImage(imageUrl);
+      }
+    };
+
     input.click();
   }, []);
 
-  const handleCreateTweet = useCallback(() => {
-    mutate({
-      content,
+  const convertImageToBase64 = (file: File) => {
+    return new Promise<string>((resolve, reject) => {
+      const fileReader = new FileReader();
+
+      fileReader.readAsDataURL(file);
+
+      fileReader.onload = () => {
+        resolve(fileReader.result as string);
+      };
+
+      fileReader.onerror = reject;
     });
-  }, [content, mutate]);
+  };
+
+  const handleCreateTweet = useCallback(async () => {
+    const toastId = toast.loading("Uploading your tweet...");
+
+    try {
+      let imageURL = "";
+
+      if (selectedImage) {
+        const compressedImage = await imageCompression(selectedImage, {
+          maxSizeMB: 0.05,
+
+          maxWidthOrHeight: 600,
+
+          useWebWorker: true,
+
+          initialQuality: 0.5,
+        });
+
+        const base64 = await convertImageToBase64(compressedImage);
+
+        const { uploadImage } = await graphqlClient.request(
+          uploadImageMutation,
+          {
+            image: base64,
+          },
+        );
+
+        imageURL = uploadImage ?? "";
+      }
+
+      await mutate({
+        content,
+        imageURL,
+      });
+
+      toast.success("Tweet uploaded successfully 🚀", {
+        id: toastId,
+      });
+
+      setContent("");
+
+      setSelectedImage(null);
+      setPreviewImage("");
+    } catch (error) {
+      console.log(error);
+
+      toast.error("Failed to upload tweet", {
+        id: toastId,
+      });
+    }
+  }, [content, mutate, selectedImage]);
   if (isLoading) {
     return (
       <TwitterLayout>
@@ -146,6 +237,53 @@ overflow-hidden
                   placeholder="What's the Mood?"
                   rows={4}
                 ></textarea>
+
+                {previewImage && (
+                  <div className="mt-4 relative">
+                    <Image
+                      src={previewImage}
+                      alt="preview-image"
+                      width={500}
+                      height={500}
+                      className="
+        rounded-2xl
+
+        max-h-[400px]
+        w-full
+
+        object-cover
+
+        border border-slate-700
+      "
+                    />
+
+                    <button
+                      onClick={() => {
+                        setSelectedImage(null);
+                        setPreviewImage("");
+                      }}
+                      className="
+        absolute top-2 right-2
+
+        bg-black/70
+
+        text-white
+
+        rounded-full
+
+        px-2 py-1
+
+        text-xs
+
+        hover:bg-red-500
+
+        transition-all
+      "
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
 
                 <div
                   className="
