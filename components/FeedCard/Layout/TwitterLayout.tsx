@@ -20,15 +20,17 @@ import { verifyGoogleTokenQuery } from "@/graphql/query/user";
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 
 import toast from "react-hot-toast";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { FiCheckCircle } from "react-icons/fi";
 import { FaShuttleSpace } from "react-icons/fa6";
 import Image from "next/image";
 import { FaTwitch } from "react-icons/fa";
 import { SiSpacex } from "react-icons/si";
+import Link from "next/link";
 interface TwitterSidebarButton {
   title: string;
   icon: React.ReactNode;
+  link: string;
 }
 
 interface TwitterLayoutProps {
@@ -39,40 +41,51 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
   const { user } = useCurrentUser();
   const queryClient = useQueryClient();
 
-  const sidebarMenuItems: TwitterSidebarButton[] = [
-    {
-      title: "Home",
-      icon: <BiHomeCircle />,
-    },
-    {
-      title: "Explore",
-      icon: <BiHash />,
-    },
-    {
-      title: "Notifications",
-      icon: <BsFillBellFill />,
-    },
-    {
-      title: "Messages",
-      icon: <BsFillEnvelopeDashFill />,
-    },
-    {
-      title: "Bookmarks",
-      icon: <BsBookmarkHeart />,
-    },
-    {
-      title: "Tweet Blue",
-      icon: <BiMoney />,
-    },
-    {
-      title: "Profile",
-      icon: <BiSolidUser />,
-    },
-    {
-      title: "More Options",
-      icon: <CgOptions />,
-    },
-  ];
+  const sidebarMenuItems: TwitterSidebarButton[] = useMemo(
+    () => [
+      {
+        title: "Home",
+        icon: <BiHomeCircle />,
+        link: "/",
+      },
+      {
+        title: "Explore",
+        icon: <BiHash />,
+        link: "/",
+      },
+      {
+        title: "Notifications",
+        icon: <BsFillBellFill />,
+        link: "/",
+      },
+      {
+        title: "Messages",
+        icon: <BsFillEnvelopeDashFill />,
+        link: "/",
+      },
+      {
+        title: "Bookmarks",
+        icon: <BsBookmarkHeart />,
+        link: "/",
+      },
+      {
+        title: "Tweet Blue",
+        icon: <BiMoney />,
+        link: "/",
+      },
+      {
+        title: "Profile",
+        icon: <BiSolidUser />,
+        link: `/${user?.id}`,
+      },
+      {
+        title: "More Options",
+        icon: <CgOptions />,
+        link: "/",
+      },
+    ],
+    [user?.id],
+  );
 
   const handleLoginwithGoogle = useCallback(
     async (cred: CredentialResponse) => {
@@ -129,8 +142,9 @@ relative overflow-hidden
           <div className="mt-2 text-sm sm:text-base md:text-lg xl:text-xl pr-2 md:pr-4">
             <ul>
               {sidebarMenuItems.map((item) => (
-                <li
-                  className="
+                <li key={item.title}>
+                  <Link
+                    className="
 flex justify-center lg:justify-start
 items-center
 
@@ -146,35 +160,45 @@ w-full lg:w-fit
 
 mt-2 transition-all
 "
-                  key={item.title}
-                >
-                  <span className="text-xl sm:text-2xl md:text-3xl">
-                    {item.icon}
-                  </span>
-                  <span className="hidden xl:block whitespace-nowrap">
-                    {item.title}
-                  </span>
+                    href={item.link}
+                  >
+                    <span className="text-xl sm:text-2xl md:text-3xl">
+                      {item.icon}
+                    </span>
+                    <span className="hidden xl:block whitespace-nowrap">
+                      {item.title}
+                    </span>
+                  </Link>
                 </li>
               ))}
             </ul>
             <div className="mt-5 px-3">
               <button
                 className="
-      group relative overflow-hidden
+group relative overflow-hidden
 
-      w-[60px] sm:w-full rounded-l-full  rounded-r-full
-      py-2 px-3
+w-12 h-12
+sm:w-14 sm:h-14
+md:w-full md:h-auto
 
-      flex items-center justify-center
+rounded-full md:rounded-2xl
 
-      bg-gradient-to-r from-sky-500 via-blue-500
+py-0 md:py-2
+px-0 md:px-3
 
-      shadow-[0_8px_25px_rgba(29,155,240,0.35)]
-      hover:shadow-[0_12px_35px_rgba(29,155,240,0.55)]
+flex items-center justify-center
 
-      transition-all duration-300
-      hover:scale-[1.02]
-    "
+bg-gradient-to-r from-sky-500 via-blue-500 to-cyan-400
+
+shadow-[0_8px_25px_rgba(29,155,240,0.35)]
+hover:shadow-[0_12px_35px_rgba(29,155,240,0.55)]
+
+transition-all duration-300
+
+hover:scale-[1.04]
+
+mx-auto
+"
               >
                 {/* Shine Effect */}
                 <span
@@ -195,23 +219,22 @@ mt-2 transition-all
                 <div className="relative z-10 flex justify-center items-center gap-3">
                   <SiSpacex
                     className="
-          text-amber-300
-          text-5xl
-          justify-center
-          items-center
+text-2xl
+sm:text-3xl
+md:text-5xl
 
-          drop-shadow-[0_4px_12px_rgba(0,0,0,0.35)]
+text-amber-300
 
-          transition-all duration-500 ease-out
+drop-shadow-[0_4px_12px_rgba(0,0,0,0.35)]
 
-          rotate-[0deg]
-          translate-x-2
-          group-hover:-translate-y-1
-          group-hover:rotate-[-22deg]
-          group-hover:scale-110
+transition-all duration-500 ease-out
 
-          animate-pulse
-        "
+group-hover:-translate-y-1
+group-hover:rotate-[-22deg]
+group-hover:scale-110
+
+animate-pulse
+"
                   />
                 </div>
 
@@ -222,27 +245,38 @@ mt-2 transition-all
           {user && (
             <div
               className="
-      absolute bottom-4 left-1/2 -translate-x-1/2
-      lg:left-0 lg:translate-x-0 lg:bottom-5
+absolute bottom-4
 
-      group flex items-center gap-3
+left-1/2 -translate-x-1/2
+lg:left-0 lg:translate-x-0 lg:bottom-5
 
-      px-3 sm:px-4 py-2.5
-      w-fit max-w-[92%]
+group flex items-center gap-2 sm:gap-3
 
-      rounded-2xl
-      border border-white/10
-      bg-white/10 backdrop-blur-xl
+px-2 sm:px-4
+py-2.5
 
-      shadow-[0_8px_30px_rgb(0,0,0,0.25)]
-      hover:shadow-[0_12px_40px_rgb(59,130,246,0.25)]
+w-[90%]
+sm:w-fit
 
-      transition-all duration-300 ease-out
-      hover:scale-[1.03]
-      hover:bg-white/15
+min-w-[72px]
+sm:min-w-[220px]
 
-      animate-[fadeInUp_0.6s_ease]
-    "
+rounded-2xl
+
+border border-white/10
+bg-white/10 backdrop-blur-xl
+
+shadow-[0_8px_30px_rgb(0,0,0,0.25)]
+hover:shadow-[0_12px_40px_rgb(59,130,246,0.25)]
+
+transition-all duration-300 ease-out
+
+hover:bg-white/15
+
+animate-[fadeInUp_0.6s_ease]
+
+overflow-hidden
+"
             >
               <div
                 className="
@@ -286,7 +320,15 @@ mt-2 transition-all
               )}
 
               {/* User Info */}
-              <div className="hidden sm:flex flex-col overflow-hidden">
+              <div
+                className="
+hidden md:flex
+flex-col
+
+overflow-hidden
+min-w-0
+"
+              >
                 <h3
                   className="
     text-sm sm:text-base md:text-lg
