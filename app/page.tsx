@@ -13,7 +13,7 @@ import { BiImageAdd } from "react-icons/bi";
 
 export default function Home() {
   const { user } = useCurrentUser();
-  const { tweets = [] } = useGetAllTweets();
+  const { tweets = [],isLoading } = useGetAllTweets();
   const { mutate } = useCreateTweet();
 
   // console.log(user);
@@ -32,6 +32,28 @@ export default function Home() {
       content,
     });
   }, [content, mutate]);
+  if (isLoading) {
+    return (
+      <TwitterLayout>
+        <div className="animate-pulse p-5 space-y-5">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-slate-700" />
+
+            <div className="space-y-2">
+              <div className="h-4 w-40 bg-slate-700 rounded" />
+              <div className="h-3 w-24 bg-slate-800 rounded" />
+            </div>
+          </div>
+
+          <div className="space-y-4 mt-10">
+            <div className="h-24 bg-slate-800 rounded-xl" />
+            <div className="h-24 bg-slate-800 rounded-xl" />
+            <div className="h-24 bg-slate-800 rounded-xl" />
+          </div>
+        </div>
+      </TwitterLayout>
+    );
+  }
 
   return (
     <div>

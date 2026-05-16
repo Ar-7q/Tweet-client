@@ -7,6 +7,7 @@ import { BiMessageRounded, BiUpload } from "react-icons/bi";
 import { FaRetweet } from "react-icons/fa";
 import { FaHeart } from "react-icons/fa6";
 import { GetAllTweetsQuery } from "@/gql/graphql";
+import Link from "next/link";
 
 interface FeedCardProps {
   data: NonNullable<GetAllTweetsQuery["getAllTweets"]>[0];
@@ -93,7 +94,9 @@ truncate
 text-slate-100
 "
             >
-              {data?.author?.firstName} {data?.author?.lastName}
+              <Link href={`/${data?.author?.id}`}>
+                {data?.author?.firstName} {data?.author?.lastName}
+              </Link>
             </h5>
 
             <p
