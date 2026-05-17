@@ -17,7 +17,7 @@ import { BiImageAdd } from "react-icons/bi";
 
 export default function Home() {
   const { user } = useCurrentUser();
-  const { tweets = [], isLoading } = useGetAllTweets();
+  const { tweets = [], isLoading, refetch } = useGetAllTweets();
   const { mutate } = useCreateTweet();
 
   // console.log(user);
@@ -78,6 +78,7 @@ export default function Home() {
 
     try {
       let imageURL = "";
+      let imagePublicId = "";
 
       if (selectedImage) {
         const compressedImage = await imageCompression(selectedImage, {
@@ -99,14 +100,14 @@ export default function Home() {
           },
         );
 
-        imageURL = uploadImage ?? "";
+        imageURL = uploadImage?.imageURL ?? "";
+        imagePublicId = uploadImage?.imagePublicId ?? "";
       }
-
       await mutate({
         content,
         imageURL,
+        imagePublicId,
       });
-
       toast.success("Tweet uploaded successfully 🚀", {
         id: toastId,
       });
@@ -343,7 +344,9 @@ whitespace-nowrap
           </div>
         </div>
         {tweets?.map((tweet) =>
-          tweet ? <FeedCard key={tweet?.id} data={tweet} /> : null,
+          tweet ? (
+            <FeedCard key={tweet?.id} data={tweet} refetch={refetch} />
+          ) : null,
         )}
       </TwitterLayout>
     </div>

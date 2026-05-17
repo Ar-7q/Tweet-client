@@ -6,7 +6,6 @@ export const createTweetMutation = graphql(`
   mutation CreateTweet($payload: CreateTweetData!) {
     createTweet(payload: $payload) {
       id
-      
     }
   }
 `);
@@ -15,7 +14,18 @@ export const uploadImageMutation = graphql(`
   #graphql
 
   mutation UploadImage($image: String!) {
-    uploadImage(image: $image)
+    uploadImage(image: $image) {
+      imageURL
+      imagePublicId
+    }
+  }
+`);
+
+export const deleteTweetMutation = graphql(`
+  #graphql
+  
+  mutation DeleteTweet($tweetId: String!) {
+    deleteTweet(tweetId: $tweetId)
   }
 `);
 // content

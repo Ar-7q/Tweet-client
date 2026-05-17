@@ -8,14 +8,50 @@ import { FaRetweet } from "react-icons/fa";
 import { FaHeart } from "react-icons/fa6";
 import { GetAllTweetsQuery } from "@/gql/graphql";
 import Link from "next/link";
+import { graphqlClient } from "@/clients/api";
+import { deleteTweetMutation } from "@/graphql/mutation/tweet";
+import { useMutation } from "@tanstack/react-query";
+import { MdDelete } from "react-icons/md";
+import { useCurrentUser } from "@/hooks/user";
+import toast from "react-hot-toast";
 
 interface FeedCardProps {
   data: NonNullable<GetAllTweetsQuery["getAllTweets"]>[0];
+  refetch: () => void;
 }
 
 const FeedCard: React.FC<FeedCardProps> = (props) => {
-  const { data } = props;
+  const { data, refetch } = props;
+  const { user } = useCurrentUser();
   const [text, setText] = useState("");
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      const toastId = toast.loading("Deleting tweet...");
+
+      try {
+        const response = await graphqlClient.request(deleteTweetMutation, {
+          tweetId: data?.id as string,
+        });
+
+        toast.success("Tweet deleted successfully 🗑️", {
+          id: toastId,
+        });
+
+        return response;
+      } catch (error) {
+        toast.error("Failed to delete tweet", {
+          id: toastId,
+        });
+
+        throw error;
+      }
+    },
+
+    onSuccess: async () => {
+      await refetch();
+    },
+  });
 
   useEffect(() => {
     setText(generate({ exactly: 40, join: " " }));
@@ -169,6 +205,23 @@ text-slate-400
               <div>
                 <BiUpload />
               </div>
+
+              {user?.id === data?.author?.id && (
+                <div
+                  onClick={() => deleteMutation.mutate()}
+                  className="
+      text-red-500
+      cursor-pointer
+
+      hover:text-red-400
+      hover:scale-110
+
+      transition-all duration-200
+    "
+                >
+                  <MdDelete />
+                </div>
+              )}
             </div>
           </div>
         </div>
