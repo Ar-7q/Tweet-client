@@ -173,8 +173,9 @@ mt-2 transition-all
               ))}
             </ul>
             <div className="mt-5 px-3">
-              <button
-                className="
+              <Link href="/">
+                <button
+                  className="
 group relative overflow-hidden
 
 w-12 h-12
@@ -199,10 +200,10 @@ hover:scale-[1.04]
 
 mx-auto
 "
-              >
-                {/* Shine Effect */}
-                <span
-                  className="
+                >
+                  {/* Shine Effect */}
+                  <span
+                    className="
         absolute inset-0
         translate-x-[-120%]
         group-hover:translate-x-[120%]
@@ -212,13 +213,13 @@ mx-auto
 
         transition-transform duration-1000
       "
-                />
+                  />
 
-                {/* Left Content */}
+                  {/* Left Content */}
 
-                <div className="relative z-10 flex justify-center items-center gap-3">
-                  <SiSpacex
-                    className="
+                  <div className="relative z-10 flex justify-center items-center gap-3">
+                    <SiSpacex
+                      className="
 text-2xl
 sm:text-3xl
 md:text-5xl
@@ -235,11 +236,12 @@ group-hover:scale-110
 
 animate-pulse
 "
-                  />
-                </div>
+                    />
+                  </div>
 
-                {/* Space Suit Icon */}
-              </button>
+                  {/* Space Suit Icon */}
+                </button>{" "}
+              </Link>
             </div>
           </div>
           {user && (

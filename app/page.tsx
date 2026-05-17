@@ -26,6 +26,7 @@ export default function Home() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
   const [previewImage, setPreviewImage] = useState("");
+  const [showImageModal, setShowImageModal] = useState(false);
 
   const handleSelectImage = useCallback(() => {
     const input = document.createElement("input");
@@ -160,6 +161,11 @@ px-2 sm:px-4 md:px-5
 py-3 sm:py-4
 
 hover:bg-slate-900/80
+hover:shadow-[0_0_25px_rgba(56,189,248,0.15)]
+
+hover:scale-[1.005]
+
+backdrop-blur-md
 
 transition-all duration-300
 
@@ -225,6 +231,11 @@ text-base sm:text-lg md:text-xl
 px-2 sm:px-3
 py-2
 
+focus:border-sky-400
+
+focus:shadow-[0_0_15px_rgba(56,189,248,0.2)]
+
+transition-all duration-300
 border-b border-slate-700
 
 outline-none
@@ -244,24 +255,18 @@ overflow-hidden
                     <Image
                       src={previewImage}
                       alt="preview-image"
-                      width={500}
-                      height={500}
-                      className="
-        rounded-2xl
-
-        max-h-[400px]
-        w-full
-
-        object-cover
-
-        border border-slate-700
-      "
+                      width={400}
+                      height={400}
+                      onClick={() => setShowImageModal(true)}
+                      className="rounded-2xl max-h-[400px] w-full object-cover border border-slate-700 cursor-pointer hover:scale-[1.02] hover:brightness-110 transition-all duration-300"
                     />
 
                     <button
                       onClick={() => {
                         setSelectedImage(null);
                         setPreviewImage("");
+
+                        toast.success("Image removed successfully 🗑️");
                       }}
                       className="
         absolute top-2 right-2
@@ -283,6 +288,73 @@ overflow-hidden
                     >
                       ✕
                     </button>
+                  </div>
+                )}
+
+                {showImageModal && (
+                  <div
+                    onClick={() => setShowImageModal(false)}
+                    className="
+fixed inset-0
+
+bg-black/80
+backdrop-blur-sm
+
+z-50
+
+flex items-center justify-center
+
+animate-fadeIn
+"
+                  >
+                    <div
+                      className="
+relative
+
+max-w-4xl
+w-[90%]
+
+animate-scaleIn
+"
+                    >
+                      <Image
+                        src={previewImage}
+                        alt="full-preview"
+                        width={1000}
+                        height={1000}
+                        className="
+rounded-3xl
+
+max-h-[90vh]
+w-full
+
+object-contain
+"
+                      />
+
+                      <button
+                        onClick={() => setShowImageModal(false)}
+                        className="
+absolute top-3 right-3
+
+bg-red-500
+
+text-white
+
+w-10 h-10
+
+rounded-full
+
+text-lg
+
+hover:scale-110
+
+transition-all duration-300
+"
+                      >
+                        ✕
+                      </button>
+                    </div>
                   </div>
                 )}
 
@@ -308,7 +380,11 @@ cursor-pointer
 
 hover:scale-110
 
-transition-all duration-200
+animate-bounce
+
+hover:rotate-12
+
+transition-all duration-300
 "
                   />
                   <button
@@ -330,6 +406,9 @@ cursor-pointer
 
 hover:scale-105
 hover:bg-sky-300
+hover:shadow-[0_0_20px_rgba(56,189,248,0.5)]
+
+active:scale-95
 
 transition-all duration-300
 

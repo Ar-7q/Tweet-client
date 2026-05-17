@@ -28,11 +28,3 @@ export const deleteTweetMutation = graphql(`
     deleteTweet(tweetId: $tweetId)
   }
 `);
-// content
-//       imageURL
-//       author {
-//         id
-//         firstName
-//         lastName
-//         profileImageUrl
-//       }

@@ -2,19 +2,23 @@
 "use client";
 import TwitterLayout from "@/components/FeedCard/Layout/TwitterLayout";
 import FeedCard from "@/components/FeedCard/page";
+import { useGetAllTweets } from "@/hooks/tweet";
 import { useCurrentUser, useGetUserById } from "@/hooks/user";
-import { log } from "console";
 
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
 import { BsArrowLeftCircleFill } from "react-icons/bs";
 
 const UserProfilePage = () => {
-  // const { user } = useCurrentUser();
+  const { user: currentUser } = useCurrentUser();
   const params = useParams();
+  const { refetch } = useGetAllTweets();
 
   const { user, isLoading } = useGetUserById(params.id as string);
   const router = useRouter();
+  const isOwnProfile = currentUser?.id === user?.id;
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   if (isLoading) {
     return (
@@ -69,7 +73,15 @@ const UserProfilePage = () => {
   }
 
   console.log(params.id);
-  console.log(router);
+  const handleProfileRefresh = async () => {
+    setIsRefreshing(true);
+
+    router.refresh();
+
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 1200);
+  };
 
   return (
     <div>
@@ -97,22 +109,120 @@ const UserProfilePage = () => {
           </nav>
           <div className="p-4 border-b border-amber-950">
             {user?.profileImageUrl && (
-              <Image
-                src={user?.profileImageUrl}
-                alt="user-image"
-                className="rounded-full"
-                width={100}
-                height={100}
-              />
+              <div
+                onClick={handleProfileRefresh}
+                className="
+relative
+
+w-fit
+
+cursor-pointer
+
+group
+"
+              >
+                {isOwnProfile && (
+                  <>
+                    <div
+                      className="
+absolute inset-[-10px]
+
+rounded-full
+
+bg-gradient-to-r
+from-pink-500
+via-sky-400
+to-violet-500
+
+opacity-70
+
+blur-2xl
+
+animate-spinSlow
+"
+                    />
+
+                    <div
+                      className="
+absolute inset-[-4px]
+
+rounded-full
+
+border-[3px]
+
+border-transparent
+
+bg-gradient-to-r
+from-pink-500
+via-cyan-400
+to-purple-500
+
+animate-pulse
+"
+                    />
+                  </>
+                )}
+
+                <Image
+                  src={user?.profileImageUrl}
+                  alt="user-image"
+                  className="
+relative z-10
+
+rounded-full
+
+border-4 border-slate-900
+animate-floatProfile
+hover:scale-105
+
+hover:shadow-[0_0_45px_rgba(168,85,247,0.55)]
+
+hover:rotate-1
+
+transition-all duration-500
+"
+                  width={100}
+                  height={100}
+                />
+
+                {isRefreshing && (
+                  <div
+                    className="
+absolute inset-0
+
+flex items-center justify-center
+
+z-20
+"
+                  >
+                    <div
+                      className="
+w-8 h-8
+
+border-4
+border-white/30
+border-t-white
+
+rounded-full
+
+animate-spin
+"
+                    />
+                  </div>
+                )}
+              </div>
             )}
             <h1 className="text-2xl font-bold mt-5">
               {user?.firstName} {user?.lastName}
             </h1>
           </div>
           <div>
-            {user?.tweets?.map((tweet) => (
-              <FeedCard data={tweet} key={tweet?.id} />
-            ))}
+            {user?.tweets
+              ?.slice()
+              ?.sort((a, b) => Number(b?.createdAt) - Number(a?.createdAt))
+              ?.map((tweet) => (
+                <FeedCard data={tweet} key={tweet?.id} refetch={refetch} />
+              ))}
           </div>
         </div>
       </TwitterLayout>

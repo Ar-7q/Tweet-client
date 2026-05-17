@@ -24,6 +24,7 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
   const { data, refetch } = props;
   const { user } = useCurrentUser();
   const [text, setText] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
@@ -57,19 +58,138 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
     setText(generate({ exactly: 40, join: " " }));
   }, []);
 
+  const handleDeleteTweet = async () => {
+    await deleteMutation.mutateAsync();
+
+    setShowDeleteModal(false);
+  };
+
   return (
     <div>
-      <div
-        className="
-border border-r-0 border-l-0 border-b-0 border-gray-700
+      {showDeleteModal && (
+        <div
+          className="
+fixed inset-0
 
-px-2 sm:px-4 md:px-5
-py-3 sm:py-4
+z-50
 
-hover:bg-slate-900/80
+flex items-center justify-center
+
+bg-black/70
+backdrop-blur-sm
+
+animate-fadeIn
+"
+        >
+          <div
+            className="
+bg-[#0f172a]
+
+border border-slate-700
+
+rounded-3xl
+
+p-6
+
+w-[90%]
+max-w-md
+
+shadow-[0_0_40px_rgba(0,0,0,0.6)]
+
+animate-scaleIn
+"
+          >
+            <h2
+              className="
+text-xl font-bold
+
+text-white
+"
+            >
+              Delete Tweet?
+            </h2>
+
+            <p
+              className="
+text-slate-400
+
+mt-2
+"
+            >
+              Are you sure you want to permanently delete this tweet?
+            </p>
+
+            <div
+              className="
+flex justify-end gap-3
+
+mt-6
+"
+            >
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="
+px-4 py-2
+
+rounded-full
+
+bg-slate-800
+
+text-white
+
+hover:bg-slate-700
 
 transition-all duration-300
-cursor-pointer
+"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleDeleteTweet}
+                className="
+px-4 py-2
+
+rounded-full
+
+bg-red-500
+
+text-white
+
+hover:bg-red-400
+
+hover:scale-105
+
+transition-all duration-300
+"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <div
+        className="
+group
+hover:-translate-y-[2px]
+
+border border-r-0 border-l-0 border-b-0 border-gray-800
+
+px-2 sm:px-4 md:px-5
+py-4 sm:py-5
+
+hover:bg-slate-900/70
+
+backdrop-blur-md
+
+hover:shadow-[0_0_30px_rgba(56,189,248,0.08)]
+
+hover:border-sky-500/20
+
+transition-all duration-500
+
+
 
 w-full overflow-hidden
 "
@@ -99,6 +219,14 @@ min-w-0
                 className="
 rounded-full
 
+ring-2 ring-transparent
+
+group-hover:ring-sky-400/40
+
+group-hover:scale-105
+
+transition-all duration-300
+
 h-10 w-10
 sm:h-11 sm:w-11
 md:h-12 md:w-12
@@ -119,21 +247,68 @@ col-span-10 sm:col-span-11
 min-w-0 overflow-hidden
 "
           >
-            <h5
+            <div
               className="
+flex items-center flex-wrap gap-2
+
+mb-2
+"
+            >
+              <Link
+                href={`/${data?.author?.id}`}
+                className="
 font-semibold
 
 text-sm sm:text-base md:text-lg
 
-truncate
-
 text-slate-100
+
+group-hover:text-sky-400
+
+hover:underline
+
+transition-all duration-300
 "
-            >
-              <Link href={`/${data?.author?.id}`}>
+              >
                 {data?.author?.firstName} {data?.author?.lastName}
               </Link>
-            </h5>
+
+              {data?.createdAt && (
+                <div
+                  className="
+px-3 py-1
+
+rounded-full
+
+bg-slate-800/80
+backdrop-blur-md
+
+border border-slate-700
+
+text-[10px] sm:text-xs
+
+text-slate-400
+
+shadow-[0_0_15px_rgba(56,189,248,0.08)]
+
+hover:border-sky-500/30
+hover:text-sky-300
+
+hover:scale-105
+
+transition-all duration-300
+"
+                >
+                  {new Date(Number(data.createdAt)).toLocaleString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                </div>
+              )}
+            </div>
 
             <p
               className="
@@ -159,16 +334,24 @@ overflow-hidden
                   width={700}
                   height={700}
                   className="
-        rounded-2xl
+rounded-3xl
 
-        w-full
+w-full
 
-        max-h-[500px]
+max-h-[500px]
 
-        object-cover
+object-cover
 
-        border border-slate-700
-      "
+border border-slate-700
+
+hover:scale-[1.01]
+
+hover:brightness-110
+
+hover:shadow-[0_0_30px_rgba(56,189,248,0.15)]
+
+transition-all duration-500
+"
                 />
               </div>
             )}
@@ -187,28 +370,54 @@ w-full
 
 max-w-[320px] sm:max-w-[420px]
 
-text-slate-400
+text-slate-500
 "
             >
-              <div>
+              <div
+                className="hover:text-sky-400
+
+hover:scale-125
+
+transition-all duration-300"
+              >
                 <BiMessageRounded />
               </div>
 
-              <div>
+              <div
+                className="hover:text-green-400
+
+hover:scale-125
+
+transition-all duration-300"
+              >
                 <FaRetweet />
               </div>
 
-              <div>
+              <div
+                className="
+hover:text-pink-500
+
+hover:scale-125
+
+transition-all duration-300
+"
+              >
                 <FaHeart />
               </div>
 
-              <div>
+              <div
+                className="hover:text-yellow-400
+
+hover:scale-125
+
+transition-all duration-300"
+              >
                 <BiUpload />
               </div>
 
               {user?.id === data?.author?.id && (
                 <div
-                  onClick={() => deleteMutation.mutate()}
+                  onClick={() => setShowDeleteModal(true)}
                   className="
       text-red-500
       cursor-pointer

@@ -44,7 +44,8 @@ export const getUserByIdQuery = graphql(`
         content
         id
         imageURL
-
+        createdAt
+        imagePublicId
         author {
           id
           firstName
