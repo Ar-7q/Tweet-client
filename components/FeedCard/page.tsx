@@ -10,13 +10,18 @@ import { GetAllTweetsQuery } from "@/gql/graphql";
 import Link from "next/link";
 import { graphqlClient } from "@/clients/api";
 import {
+  createCommentMutation,
+  deleteCommentMutation,
   deleteTweetMutation,
   toggleLikeMutation,
 } from "@/graphql/mutation/tweet";
 import { useMutation } from "@tanstack/react-query";
-import { MdDelete } from "react-icons/md";
+import { MdDelete, MdDeleteSweep, MdOutlineWarning } from "react-icons/md";
 import { useCurrentUser } from "@/hooks/user";
 import toast from "react-hot-toast";
+import { FiDelete } from "react-icons/fi";
+import { AiFillDelete } from "react-icons/ai";
+import { IoMdWarning } from "react-icons/io";
 
 interface FeedCardProps {
   data: NonNullable<GetAllTweetsQuery["getAllTweets"]>[0];
@@ -32,6 +37,9 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
   const [liked, setLiked] = useState(false);
 
   const [isAnimatingLike, setIsAnimatingLike] = useState(false);
+
+  const [comment, setComment] = useState("");
+  const [showCommentBox, setShowCommentBox] = useState(false);
 
   const likeMutation = useMutation({
     mutationFn: async () => {
@@ -72,6 +80,63 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
     },
   });
 
+  const commentMutation = useMutation({
+    mutationFn: async () => {
+      if (!user) {
+        toast.error("Unauthorized");
+        return;
+      }
+
+      return graphqlClient.request(createCommentMutation, {
+        tweetId: data?.id as string,
+        content: comment,
+      });
+    },
+
+    onSuccess: async () => {
+      toast.success("Comment added");
+
+      setComment("");
+
+      await refetch();
+    },
+
+    onError: () => {
+      toast.error("Failed to comment");
+    },
+  });
+
+  const deleteCommentMutationHook = useMutation({
+    mutationFn: async (commentId: string) => {
+      const toastId = toast.loading("Deleting comment...");
+
+      try {
+        // smooth UX delay
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        const response = await graphqlClient.request(deleteCommentMutation, {
+          commentId,
+        });
+
+        toast.success("Comment deleted 🗑️", {
+          id: toastId,
+        });
+
+        return response;
+      } catch (error) {
+        toast.error("Failed to delete comment", {
+          id: toastId,
+        });
+
+        throw error;
+      }
+    },
+
+    onSuccess: async () => {
+      await refetch();
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async () => {
       const toastId = toast.loading("Deleting tweet...");
@@ -109,8 +174,36 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
 
     setShowDeleteModal(false);
   };
+
   const handleLike = async () => {
     await likeMutation.mutateAsync();
+  };
+
+  const handleComment = async () => {
+    if (!comment.trim()) {
+      toast.error("Comment cannot be empty");
+      return;
+    }
+
+    try {
+      await commentMutation.mutateAsync();
+    } catch (error: any) {
+      const message = error?.response?.errors?.[0]?.message;
+
+      if (message === "Please wait before commenting again") {
+        toast.error("Please wait 5 seconds before commenting again");
+
+        return;
+      }
+
+      toast.error("Failed to comment");
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      await deleteCommentMutationHook.mutateAsync(commentId);
+    } catch {}
   };
 
   return (
@@ -218,6 +311,182 @@ transition-all duration-300
           </div>
         </div>
       )}
+
+      {showCommentBox && (
+        <div
+          className="
+fixed inset-0
+
+z-50
+
+flex items-center justify-center
+
+bg-black/70
+backdrop-blur-sm
+"
+        >
+          <div
+            className="
+bg-[#0f172a]
+
+border border-slate-700
+
+rounded-3xl
+
+w-[95%]
+max-w-2xl
+
+max-h-[85vh]
+
+overflow-y-auto
+
+p-6
+
+shadow-[0_0_40px_rgba(0,0,0,0.6)]
+"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-white">Comments</h2>
+
+              <button
+                onClick={() => setShowCommentBox(false)}
+                className="
+text-slate-400
+
+hover:text-red-400
+
+text-xl
+
+transition-all duration-300
+"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-5 flex gap-2">
+              <input
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Write a comment..."
+                className="
+w-full
+
+rounded-xl
+
+bg-slate-900
+
+border border-slate-700
+
+px-4 py-2
+
+text-sm text-white
+
+outline-none
+
+focus:border-sky-500
+"
+              />
+
+              <button
+                disabled={commentMutation.isPending}
+                onClick={handleComment}
+                className="
+px-4 py-2
+
+rounded-xl
+
+bg-sky-500
+
+text-white
+
+disabled:opacity-50
+
+hover:bg-sky-400
+
+transition-all duration-300
+"
+              >
+                {commentMutation.isPending ? "Commenting..." : "Comment"}
+              </button>
+            </div>
+
+            <div className="mt-6 space-y-4">
+              {data?.comments?.map((comment: any) => (
+                <div
+                  key={comment?.id}
+                  className="
+rounded-2xl
+
+bg-slate-900/70
+
+border border-slate-800
+
+p-4
+"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Link
+                        href={`/${comment?.author?.id}`}
+                        className="
+text-sm font-semibold
+
+text-sky-400
+
+hover:text-sky-300
+
+hover:underline
+
+transition-all duration-300
+"
+                      >
+                        {comment?.author?.firstName} {comment?.author?.lastName}
+                      </Link>
+
+                      <div className="text-[10px] text-slate-500">
+                        {new Date(Number(comment?.createdAt)).toLocaleString(
+                          "en-IN",
+                          {
+                            day: "numeric",
+                            month: "short",
+                            hour: "numeric",
+                            minute: "2-digit",
+                          },
+                        )}
+                      </div>
+                    </div>
+
+                    {user?.id === comment?.author?.id && (
+                      <div
+                        onClick={() => handleDeleteComment(comment.id)}
+                        className="
+text-orange-300
+
+cursor-pointer
+
+hover:text-red-400
+
+hover:scale-130
+
+transition-all duration-300
+"
+                      >
+                        <FiDelete size={14} />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-2 text-sm text-slate-300">
+                    {comment?.content}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div
         className="
 group
@@ -423,15 +692,32 @@ text-slate-500
 "
             >
               <div
-                className="hover:text-sky-400
+                onClick={() => {
+                  if (!user) {
+                    toast.error("Unauthorized");
+                    return;
+                  }
+
+                  setShowCommentBox(!showCommentBox);
+                }}
+                className="
+hover:text-sky-400
 
 hover:scale-125
 
-transition-all duration-300"
-              >
-                <BiMessageRounded />
-              </div>
+transition-all duration-300
 
+cursor-pointer
+"
+              >
+                <div className="flex items-center gap-2">
+                  <BiMessageRounded />
+
+                  <span className="text-xs sm:text-sm">
+                    {data?.comments?.length ?? 0}
+                  </span>
+                </div>
+              </div>
               <div
                 className="hover:text-green-400
 
@@ -479,16 +765,16 @@ transition-all duration-300"
                 <div
                   onClick={() => setShowDeleteModal(true)}
                   className="
-      text-red-500
+      text-red-100
       cursor-pointer
 
       hover:text-red-400
-      hover:scale-110
+      hover:scale-170
 
       transition-all duration-200
     "
                 >
-                  <MdDelete />
+                  <MdDeleteSweep />
                 </div>
               )}
             </div>

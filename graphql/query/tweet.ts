@@ -16,6 +16,18 @@ export const getAllTweetsQuery = graphql(`
         lastName
         profileImageUrl
       }
+      comments {
+        id
+        content
+        createdAt
+
+        author {
+          id
+          firstName
+          lastName
+          profileImageUrl
+        }
+      }
     }
   }
 `);
