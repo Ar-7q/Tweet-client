@@ -1,5 +1,4 @@
 import { graphql } from "@/gql";
-
 export const createTweetMutation = graphql(`
   #graphql
 
@@ -26,5 +25,13 @@ export const deleteTweetMutation = graphql(`
   
   mutation DeleteTweet($tweetId: String!) {
     deleteTweet(tweetId: $tweetId)
+  }
+`);
+
+export const toggleLikeMutation = graphql(`
+  #graphql
+
+  mutation ToggleLike($tweetId: String!) {
+    toggleLike(tweetId: $tweetId)
   }
 `);

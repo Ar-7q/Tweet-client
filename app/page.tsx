@@ -54,6 +54,7 @@ export default function Home() {
         const imageUrl = URL.createObjectURL(file);
 
         setPreviewImage(imageUrl);
+        toast.success("Image picked successfully 🖼️");
       }
     };
 
@@ -75,6 +76,18 @@ export default function Home() {
   };
 
   const handleCreateTweet = useCallback(async () => {
+    if (!user) {
+      toast.error("Tweet not posted. User is not signed in ❌");
+
+      return;
+    }
+
+    if (!content.trim() && !selectedImage) {
+      toast.error("Please write something or select an image");
+
+      return;
+    }
+
     const toastId = toast.loading("Uploading your tweet...");
 
     try {
@@ -104,11 +117,13 @@ export default function Home() {
         imageURL = uploadImage?.imageURL ?? "";
         imagePublicId = uploadImage?.imagePublicId ?? "";
       }
+
       await mutate({
         content,
         imageURL,
         imagePublicId,
       });
+
       toast.success("Tweet uploaded successfully 🚀", {
         id: toastId,
       });
@@ -120,11 +135,11 @@ export default function Home() {
     } catch (error) {
       console.log(error);
 
-      toast.error("Failed to upload tweet", {
+      toast.error("Failed to upload tweet ❌", {
         id: toastId,
       });
     }
-  }, [content, mutate, selectedImage]);
+  }, [content, mutate, selectedImage, user]);
   if (isLoading) {
     return (
       <TwitterLayout>

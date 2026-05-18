@@ -9,7 +9,10 @@ import { FaHeart } from "react-icons/fa6";
 import { GetAllTweetsQuery } from "@/gql/graphql";
 import Link from "next/link";
 import { graphqlClient } from "@/clients/api";
-import { deleteTweetMutation } from "@/graphql/mutation/tweet";
+import {
+  deleteTweetMutation,
+  toggleLikeMutation,
+} from "@/graphql/mutation/tweet";
 import { useMutation } from "@tanstack/react-query";
 import { MdDelete } from "react-icons/md";
 import { useCurrentUser } from "@/hooks/user";
@@ -25,6 +28,49 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
   const { user } = useCurrentUser();
   const [text, setText] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const [liked, setLiked] = useState(false);
+
+  const [isAnimatingLike, setIsAnimatingLike] = useState(false);
+
+  const likeMutation = useMutation({
+    mutationFn: async () => {
+      if (!user) {
+        toast.error("You need to sign in for liking");
+        return;
+      }
+
+      return graphqlClient.request(toggleLikeMutation, {
+        tweetId: data?.id as string,
+      });
+    },
+
+    onSuccess: async (response) => {
+      if (!response) return;
+
+      const isLiked = response.toggleLike ?? false;
+
+      setLiked(isLiked);
+
+      setIsAnimatingLike(true);
+
+      if (isLiked) {
+        toast.success("Tweet liked ❤️");
+      } else {
+        toast.success("Like removed 💔");
+      }
+
+      setTimeout(() => {
+        setIsAnimatingLike(false);
+      }, 400);
+
+      await refetch();
+    },
+
+    onError: () => {
+      toast.error("Failed to like tweet");
+    },
+  });
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
@@ -62,6 +108,9 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
     await deleteMutation.mutateAsync();
 
     setShowDeleteModal(false);
+  };
+  const handleLike = async () => {
+    await likeMutation.mutateAsync();
   };
 
   return (
@@ -394,15 +443,26 @@ transition-all duration-300"
               </div>
 
               <div
-                className="
-hover:text-pink-500
-
-hover:scale-125
+                onClick={handleLike}
+                className={`
+cursor-pointer
 
 transition-all duration-300
-"
+
+${liked ? "text-pink-500" : "text-slate-500"}
+
+hover:text-pink-500
+
+${isAnimatingLike ? "scale-150" : "hover:scale-125"}
+`}
               >
-                <FaHeart />
+                <div className="flex items-center gap-2">
+                  <FaHeart />
+
+                  <span className="text-xs sm:text-sm">
+                    {data?.likesCount ?? 0}
+                  </span>
+                </div>
               </div>
 
               <div

@@ -9,6 +9,7 @@ export const getAllTweetsQuery = graphql(`
       imageURL
       createdAt
       imagePublicId
+      likesCount
       author {
         id
         firstName
