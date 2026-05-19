@@ -51,8 +51,10 @@ const UserProfilePage = () => {
 
       toast.success("User followed");
 
+      await refetchUser();
+
       await queryClient.invalidateQueries({
-        queryKey: ["user-by-id", user?.id],
+        queryKey: ["current-user"],
       });
     },
 
@@ -78,8 +80,10 @@ const UserProfilePage = () => {
 
       toast.success("User unfollowed");
 
+      await refetchUser();
+
       await queryClient.invalidateQueries({
-        queryKey: ["user-by-id", user?.id],
+        queryKey: ["current-user"],
       });
     },
 
@@ -155,86 +159,111 @@ const UserProfilePage = () => {
     <div>
       <TwitterLayout>
         <div>
-          <nav className="flex items-center gap-3 py-3 px-3">
-            <BsArrowLeftCircleFill
-              onClick={() => router.back()}
-              className="
-    text-4xl
-    cursor-pointer
-    hover:scale-110
-    transition-all
-    duration-200
-  "
-            />
-            <div>
-              <h1 className="text-2xl font-semibold font-sans">
-                {user?.firstName} {user?.lastName}
-              </h1>
-              <div className="flex items-center gap-5 mt-3 text-slate-400">
-                <div>
-                  <span className="font-bold text-white">
-                    {user?.followers?.length || 0}
-                  </span>{" "}
-                  Followers
-                </div>
+          <nav className="py-3 px-3 border-b border-slate-800">
+            {/* Top Row */}
+            <div className="flex items-center gap-3">
+              <BsArrowLeftCircleFill
+                onClick={() => router.back()}
+                className="
+text-4xl
 
-                <div>
-                  <span className="font-bold text-white">
-                    {user?.following?.length || 0}
-                  </span>{" "}
-                  Following
-                </div>
+cursor-pointer
+
+hover:scale-110
+
+transition-all duration-200
+"
+              />
+
+              <div>
+                <h1 className="text-2xl font-bold">
+                  {user?.firstName} {user?.lastName}
+                </h1>
+
+                <p className="text-slate-400 text-sm">
+                  {user?.tweets?.length || 0} Tweets
+                </p>
               </div>
+            </div>
 
-              {!isOwnProfile && (
-                <button
-                  disabled={
-                    followMutation.isPending || unfollowMutation.isPending
-                  }
-                  onClick={() => {
-                    if (!currentUser) {
-                      toast.error("Please sign in first");
-                      return;
-                    }
+            {/* Stats */}
+            <div
+              className="
+flex items-center
 
-                    if (isFollowing) {
-                      unfollowMutation.mutate();
-                    } else {
-                      followMutation.mutate();
-                    }
-                  }}
-                  className="
+gap-8
+
 mt-5
 
-px-6 py-2
+flex-wrap
+"
+            >
+              <div className="flex flex-col items-center">
+                <span className="text-white font-bold text-lg">
+                  {user?.followers?.length || 0}
+                </span>
+
+                <span className="text-slate-400 text-sm">Followers</span>
+              </div>
+
+              <div className="flex flex-col items-center">
+                <span className="text-white font-bold text-lg">
+                  {user?.following?.length || 0}
+                </span>
+
+                <span className="text-slate-400 text-sm">Following</span>
+              </div>
+            </div>
+
+            {/* Follow Button */}
+            {!isOwnProfile && (
+              <button
+                disabled={
+                  followMutation.isPending || unfollowMutation.isPending
+                }
+                onClick={() => {
+                  if (!currentUser) {
+                    toast.error("Please sign in first");
+                    return;
+                  }
+
+                  if (isFollowing) {
+                    unfollowMutation.mutate();
+                  } else {
+                    followMutation.mutate();
+                  }
+                }}
+                className="
+mt-5
+
+px-8 py-2.5
 
 rounded-full
 
 font-semibold
 
-bg-sky-500
+text-white
 
-hover:bg-sky-400
+bg-gradient-to-r
+from-sky-500
+to-cyan-400
 
 hover:scale-105
+
+hover:shadow-[0_0_25px_rgba(56,189,248,0.45)]
 
 transition-all duration-300
 
 disabled:opacity-50
 "
-                >
-                  {followMutation.isPending || unfollowMutation.isPending
-                    ? "Loading..."
-                    : isFollowing
-                      ? "Unfollow"
-                      : "Follow"}
-                </button>
-              )}
-
-              <h1 className="text-md font-bold text-slate-500">
-                {user?.tweets?.length || 0} Tweets
-              </h1>
-            </div>
+              >
+                {followMutation.isPending || unfollowMutation.isPending
+                  ? "Loading..."
+                  : isFollowing
+                    ? "Unfollow"
+                    : "Follow"}
+              </button>
+            )}
           </nav>
           <div className="p-4 border-b border-amber-950">
             {user?.profileImageUrl && (

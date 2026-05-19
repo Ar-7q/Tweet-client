@@ -649,8 +649,8 @@ overflow-hidden
                 <Image
                   src={data.imageURL}
                   alt="tweet-image"
-                  width={700}
-                  height={700}
+                  width={600}
+                  height={600}
                   className="
 rounded-3xl
 

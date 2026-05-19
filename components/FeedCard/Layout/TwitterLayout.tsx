@@ -20,13 +20,14 @@ import { verifyGoogleTokenQuery } from "@/graphql/query/user";
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 
 import toast from "react-hot-toast";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { FiCheckCircle } from "react-icons/fi";
 import { FaShuttleSpace } from "react-icons/fa6";
 import Image from "next/image";
 import { FaTwitch } from "react-icons/fa";
 import { SiSpacex } from "react-icons/si";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 interface TwitterSidebarButton {
   title: string;
   icon: React.ReactNode;
@@ -41,6 +42,14 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
   const { user } = useCurrentUser();
   const queryClient = useQueryClient();
 
+  const router = useRouter();
+
+  const [openFollowingModal, setOpenFollowingModal] = useState(false);
+
+  const [searchFollowing, setSearchFollowing] = useState("");
+  const [openFollowersModal, setOpenFollowersModal] = useState(false);
+
+  const [searchFollowers, setSearchFollowers] = useState("");
   const sidebarMenuItems: TwitterSidebarButton[] = useMemo(
     () => [
       {
@@ -409,16 +418,596 @@ hidden xl:block
 xl:col-span-3
 
 p-3 xl:p-5
+
+space-y-5
 "
         >
-          {!user && (
+          {!user ? (
             <div className="p-5 bg-slate-700 rounded-lg">
               <h1 className="my-2 text-2xl">New User 🧰</h1>
 
               <GoogleLogin onSuccess={handleLoginwithGoogle} />
             </div>
+          ) : (
+            <div
+              className="
+sticky top-5
+
+bg-black/70
+
+border border-slate-800
+
+rounded-2xl
+
+p-5
+
+backdrop-blur-xl
+
+shadow-[0_0_25px_rgba(56,189,248,0.08)]
+"
+            >
+              <h1
+                className="
+text-2xl
+
+font-bold
+
+mb-5
+
+bg-gradient-to-r
+from-sky-400
+to-cyan-300
+
+bg-clip-text
+text-transparent
+"
+              >
+                Recommended Users
+              </h1>
+
+              <div className="space-y-4">
+                {user?.recommendedUsers?.length ? (
+                  user.recommendedUsers.map((u) => (
+                    <div
+                      key={u?.id}
+                      onClick={() => router.push(`/user/${u?.id}`)}
+                      className="
+flex items-center gap-3
+
+cursor-pointer
+
+hover:bg-slate-900/80
+
+p-3
+
+rounded-2xl
+
+transition-all duration-300
+
+hover:scale-[1.02]
+
+group
+"
+                    >
+                      <Image
+                        src={u?.profileImageUrl || ""}
+                        alt="recommended-user"
+                        width={55}
+                        height={55}
+                        className="
+rounded-full
+
+border border-slate-700
+
+object-cover
+
+group-hover:scale-105
+
+transition-all duration-300
+"
+                      />
+
+                      <div className="overflow-hidden">
+                        <h1
+                          className="
+font-semibold
+
+text-white
+
+truncate
+"
+                        >
+                          {u?.firstName} {u?.lastName}
+                        </h1>
+
+                        <p
+                          className="
+text-sm
+
+text-slate-400
+"
+                        >
+                          Suggested for you
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-slate-500 text-sm">
+                    No recommendations yet
+                  </div>
+                )}
+              </div>
+
+              <div
+                onClick={() => setOpenFollowersModal(true)}
+                className="
+mt-6
+
+bg-black/70
+
+border border-slate-800
+
+rounded-2xl
+
+p-5
+
+backdrop-blur-xl
+
+shadow-[0_0_25px_rgba(56,189,248,0.08)]
+
+cursor-pointer
+
+hover:border-sky-500/40
+
+transition-all duration-300
+"
+              >
+                <h1
+                  className="
+text-2xl
+
+font-bold
+
+mb-3
+
+bg-gradient-to-r
+from-sky-400
+to-cyan-300
+
+bg-clip-text
+text-transparent
+"
+                >
+                  Your Followers ({user?.followers?.length || 0})
+                </h1>
+
+                <p className="text-slate-400 text-sm">
+                  Click to view followers list
+                </p>
+
+                <div className="mt-4 flex -space-x-3">
+                  {user?.followers?.slice(0, 5).map((f) => (
+                    <Image
+                      key={f?.follower?.id}
+                      src={f?.follower?.profileImageUrl || ""}
+                      alt="followers-preview"
+                      width={45}
+                      height={45}
+                      className="
+rounded-full
+
+border-2 border-black
+
+object-cover
+"
+                    />
+                  ))}
+                </div>
+              </div>
+              <div
+                onClick={() => setOpenFollowingModal(true)}
+                className="
+mt-6
+
+bg-black/70
+
+border border-slate-800
+
+rounded-2xl
+
+p-5
+
+backdrop-blur-xl
+
+shadow-[0_0_25px_rgba(168,85,247,0.08)]
+
+cursor-pointer
+
+hover:border-pink-500/40
+
+transition-all duration-300
+"
+              >
+                <h1
+                  className="
+text-2xl
+
+font-bold
+
+mb-3
+
+bg-gradient-to-r
+from-pink-400
+to-purple-400
+
+bg-clip-text
+text-transparent
+"
+                >
+                  Your Following ({user?.following?.length || 0})
+                </h1>
+
+                <p className="text-slate-400 text-sm">
+                  Click to view following list
+                </p>
+
+                <div className="mt-4 flex -space-x-3">
+                  {user?.following?.slice(0, 5).map((f) => (
+                    <Image
+                      key={f?.following?.id}
+                      src={f?.following?.profileImageUrl || ""}
+                      alt="following-preview"
+                      width={45}
+                      height={45}
+                      className="
+rounded-full
+
+border-2 border-black
+
+object-cover
+"
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
           )}
         </div>
+
+        {openFollowersModal && (
+          <div
+            className="
+fixed inset-0
+
+z-50
+
+flex items-center justify-center
+
+bg-black/70
+
+backdrop-blur-sm
+"
+          >
+            <div
+              className="
+w-[95%]
+max-w-md
+
+max-h-[80vh]
+
+overflow-hidden
+
+bg-[#0f0f0f]
+
+border border-slate-800
+
+rounded-3xl
+
+shadow-2xl
+"
+            >
+              {/* Header */}
+              <div
+                className="
+flex items-center justify-between
+
+p-5
+
+border-b border-slate-800
+"
+              >
+                <h1
+                  className="
+text-2xl
+
+font-bold
+
+bg-gradient-to-r
+from-sky-400
+to-cyan-300
+
+bg-clip-text
+text-transparent
+"
+                >
+                  Your Followers
+                </h1>
+
+                <button
+                  onClick={() => setOpenFollowersModal(false)}
+                  className="
+text-slate-400
+
+hover:text-white
+
+text-xl
+"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Search */}
+              <div className="p-4 border-b border-slate-800">
+                <input
+                  value={searchFollowers}
+                  onChange={(e) => setSearchFollowers(e.target.value)}
+                  placeholder="Search followers..."
+                  className="
+w-full
+
+bg-black
+
+border border-slate-700
+
+rounded-xl
+
+px-4 py-3
+
+outline-none
+
+focus:border-sky-500
+
+text-white
+"
+                />
+              </div>
+
+              {/* Users */}
+              <div
+                className="
+overflow-y-auto
+
+max-h-[55vh]
+
+p-4
+
+space-y-4
+"
+              >
+                {user?.followers
+                  ?.filter((f) =>
+                    `${f?.follower?.firstName} ${f?.follower?.lastName}`
+                      .toLowerCase()
+                      .includes(searchFollowers.toLowerCase()),
+                  )
+                  .map((f) => (
+                    <div
+                      key={f?.follower?.id}
+                      onClick={() => {
+                        router.push(`/user/${f?.follower?.id}`);
+
+                        setOpenFollowersModal(false);
+                      }}
+                      className="
+flex items-center gap-3
+
+cursor-pointer
+
+hover:bg-slate-900
+
+p-3
+
+rounded-2xl
+
+transition-all duration-300
+"
+                    >
+                      <Image
+                        src={f?.follower?.profileImageUrl || ""}
+                        alt="followers-user"
+                        width={55}
+                        height={55}
+                        className="
+rounded-full
+
+object-cover
+
+border border-slate-700
+"
+                      />
+
+                      <div>
+                        <h1 className="font-semibold text-white">
+                          {f?.follower?.firstName} {f?.follower?.lastName}
+                        </h1>
+
+                        <p className="text-sm text-slate-400">Follower</p>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {openFollowingModal && (
+          <div
+            className="
+fixed inset-0
+
+z-50
+
+flex items-center justify-center
+
+bg-black/70
+
+backdrop-blur-sm
+"
+          >
+            <div
+              className="
+w-[95%]
+max-w-md
+
+max-h-[80vh]
+
+overflow-hidden
+
+bg-[#0f0f0f]
+
+border border-slate-800
+
+rounded-3xl
+
+shadow-2xl
+"
+            >
+              {/* Header */}
+              <div
+                className="
+flex items-center justify-between
+
+p-5
+
+border-b border-slate-800
+"
+              >
+                <h1
+                  className="
+text-2xl
+
+font-bold
+
+bg-gradient-to-r
+from-pink-400
+to-purple-400
+
+bg-clip-text
+text-transparent
+"
+                >
+                  Your Following
+                </h1>
+
+                <button
+                  onClick={() => setOpenFollowingModal(false)}
+                  className="
+text-slate-400
+
+hover:text-white
+
+text-xl
+"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Search */}
+              <div className="p-4 border-b border-slate-800">
+                <input
+                  value={searchFollowing}
+                  onChange={(e) => setSearchFollowing(e.target.value)}
+                  placeholder="Search following..."
+                  className="
+w-full
+
+bg-black
+
+border border-slate-700
+
+rounded-xl
+
+px-4 py-3
+
+outline-none
+
+focus:border-pink-500
+
+text-white
+"
+                />
+              </div>
+
+              {/* Users */}
+              <div
+                className="
+overflow-y-auto
+
+max-h-[55vh]
+
+p-4
+
+space-y-4
+"
+              >
+                {user?.following
+                  ?.filter((f) =>
+                    `${f?.following?.firstName} ${f?.following?.lastName}`
+                      .toLowerCase()
+                      .includes(searchFollowing.toLowerCase()),
+                  )
+                  .map((f) => (
+                    <div
+                      key={f?.following?.id}
+                      onClick={() => {
+                        router.push(`/user/${f?.following?.id}`);
+
+                        setOpenFollowingModal(false);
+                      }}
+                      className="
+flex items-center gap-3
+
+cursor-pointer
+
+hover:bg-slate-900
+
+p-3
+
+rounded-2xl
+
+transition-all duration-300
+"
+                    >
+                      <Image
+                        src={f?.following?.profileImageUrl || ""}
+                        alt="following-user"
+                        width={55}
+                        height={55}
+                        className="
+rounded-full
+
+object-cover
+
+border border-slate-700
+"
+                      />
+
+                      <div>
+                        <h1 className="font-semibold text-white">
+                          {f?.following?.firstName} {f?.following?.lastName}
+                        </h1>
+
+                        <p className="text-sm text-slate-400">Following</p>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

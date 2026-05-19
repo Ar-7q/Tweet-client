@@ -875,6 +875,22 @@
             "deprecationReason": null
           },
           {
+            "name": "recommendedUsers",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "name": "User",
+                "kind": "OBJECT",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "tweets",
             "description": null,
             "args": [],
