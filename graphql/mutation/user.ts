@@ -11,3 +11,9 @@ export const unfollowUserMutation = graphql(`
     unfollowUser(to: $to)
   }
 `);
+
+export const logoutUserMutation = graphql(`
+  mutation LogoutUser {
+    logoutUser
+  }
+`);

@@ -22,6 +22,7 @@ type Documents = {
     "\n  #graphql\n\n  mutation DeleteComment($commentId: String!) {\n    deleteComment(commentId: $commentId)\n  }\n": typeof types.DeleteCommentDocument,
     "\n  mutation FollowUser($to: String!) {\n    followUser(to: $to)\n  }\n": typeof types.FollowUserDocument,
     "\n  mutation UnfollowUser($to: String!) {\n    unfollowUser(to: $to)\n  }\n": typeof types.UnfollowUserDocument,
+    "\n  mutation LogoutUser {\n    logoutUser\n  }\n": typeof types.LogoutUserDocument,
     "\n  #graphql\n  query GetAllTweets {\n    getAllTweets {\n      id\n      content\n      imageURL\n      createdAt\n      imagePublicId\n      likesCount\n      author {\n        id\n        firstName\n        lastName\n        profileImageUrl\n      }\n      comments {\n        id\n        content\n        createdAt\n\n        author {\n          id\n          firstName\n          lastName\n          profileImageUrl\n        }\n      }\n    }\n  }\n": typeof types.GetAllTweetsDocument,
     "\n  #graphql\n  query VerifyGoogleToken($token: String!) {\n    verifyGoogleToken(token: $token)\n  }\n": typeof types.VerifyGoogleTokenDocument,
     "\n  query GetCurrentUser {\n    getCurrentUser {\n      id\n      profileImageUrl\n      email\n      firstName\n      lastName\n      tweets {\n        id\n        content\n        imageURL\n        author {\n          id\n          firstName\n          lastName\n          profileImageUrl\n        }\n      }\n\n      recommendedUsers {\n        id\n        firstName\n        lastName\n        profileImageUrl\n      }\n\n      following {\n        following {\n          id\n          firstName\n          lastName\n          profileImageUrl\n        }\n      }\n\n      followers {\n        follower {\n          id\n          firstName\n          lastName\n          profileImageUrl\n        }\n      }\n    }\n  }\n": typeof types.GetCurrentUserDocument,
@@ -36,6 +37,7 @@ const documents: Documents = {
     "\n  #graphql\n\n  mutation DeleteComment($commentId: String!) {\n    deleteComment(commentId: $commentId)\n  }\n": types.DeleteCommentDocument,
     "\n  mutation FollowUser($to: String!) {\n    followUser(to: $to)\n  }\n": types.FollowUserDocument,
     "\n  mutation UnfollowUser($to: String!) {\n    unfollowUser(to: $to)\n  }\n": types.UnfollowUserDocument,
+    "\n  mutation LogoutUser {\n    logoutUser\n  }\n": types.LogoutUserDocument,
     "\n  #graphql\n  query GetAllTweets {\n    getAllTweets {\n      id\n      content\n      imageURL\n      createdAt\n      imagePublicId\n      likesCount\n      author {\n        id\n        firstName\n        lastName\n        profileImageUrl\n      }\n      comments {\n        id\n        content\n        createdAt\n\n        author {\n          id\n          firstName\n          lastName\n          profileImageUrl\n        }\n      }\n    }\n  }\n": types.GetAllTweetsDocument,
     "\n  #graphql\n  query VerifyGoogleToken($token: String!) {\n    verifyGoogleToken(token: $token)\n  }\n": types.VerifyGoogleTokenDocument,
     "\n  query GetCurrentUser {\n    getCurrentUser {\n      id\n      profileImageUrl\n      email\n      firstName\n      lastName\n      tweets {\n        id\n        content\n        imageURL\n        author {\n          id\n          firstName\n          lastName\n          profileImageUrl\n        }\n      }\n\n      recommendedUsers {\n        id\n        firstName\n        lastName\n        profileImageUrl\n      }\n\n      following {\n        following {\n          id\n          firstName\n          lastName\n          profileImageUrl\n        }\n      }\n\n      followers {\n        follower {\n          id\n          firstName\n          lastName\n          profileImageUrl\n        }\n      }\n    }\n  }\n": types.GetCurrentUserDocument,
@@ -88,6 +90,10 @@ export function graphql(source: "\n  mutation FollowUser($to: String!) {\n    fo
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation UnfollowUser($to: String!) {\n    unfollowUser(to: $to)\n  }\n"): (typeof documents)["\n  mutation UnfollowUser($to: String!) {\n    unfollowUser(to: $to)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation LogoutUser {\n    logoutUser\n  }\n"): (typeof documents)["\n  mutation LogoutUser {\n    logoutUser\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

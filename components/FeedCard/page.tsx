@@ -3,9 +3,9 @@
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { generate } from "random-words";
-import { BiMessageRounded, BiUpload } from "react-icons/bi";
+import { BiMessage, BiMessageRounded, BiUpload } from "react-icons/bi";
 import { FaRetweet } from "react-icons/fa";
-import { FaHeart } from "react-icons/fa6";
+import { FaHeart, FaMessage } from "react-icons/fa6";
 import { GetAllTweetsQuery } from "@/gql/graphql";
 import Link from "next/link";
 import { graphqlClient } from "@/clients/api";
@@ -22,6 +22,7 @@ import toast from "react-hot-toast";
 import { FiDelete } from "react-icons/fi";
 import { AiFillDelete } from "react-icons/ai";
 import { IoMdWarning } from "react-icons/io";
+import { SiMessenger } from "react-icons/si";
 
 interface FeedCardProps {
   data: NonNullable<GetAllTweetsQuery["getAllTweets"]>[0];
@@ -711,7 +712,7 @@ cursor-pointer
 "
               >
                 <div className="flex items-center gap-2">
-                  <BiMessageRounded />
+                  <SiMessenger />
 
                   <span className="text-xs sm:text-sm">
                     {data?.comments?.length ?? 0}
@@ -751,7 +752,7 @@ ${isAnimatingLike ? "scale-150" : "hover:scale-125"}
                 </div>
               </div>
 
-              <div
+              {/* <div
                 className="hover:text-yellow-400
 
 hover:scale-125
@@ -759,7 +760,7 @@ hover:scale-125
 transition-all duration-300"
               >
                 <BiUpload />
-              </div>
+              </div> */}
 
               {user?.id === data?.author?.id && (
                 <div

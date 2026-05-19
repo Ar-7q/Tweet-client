@@ -1,15 +1,26 @@
-import { graphqlClient } from "@/clients/api"
-import { getCurrentUserQuery, getUserByIdQuery } from "@/graphql/query/user"
-import { useQuery } from "@tanstack/react-query"
+import { graphqlClient } from "@/clients/api";
+import { getCurrentUserQuery, getUserByIdQuery } from "@/graphql/query/user";
 
-export const useCurrentUser=()=>{
-    const query=useQuery({
-        queryKey:['current-user'],
-        queryFn:()=>graphqlClient.request(getCurrentUserQuery),
-    })
+import { useQuery } from "@tanstack/react-query";
 
-    return {...query,user:query.data?.getCurrentUser}
-}
+export const useCurrentUser = () => {
+  const query = useQuery({
+    queryKey: ["current-user"],
+
+    queryFn: () => graphqlClient.request(getCurrentUserQuery),
+
+    refetchInterval: 2000,
+
+    staleTime: 0,
+
+    refetchOnWindowFocus: true,
+  });
+
+  return {
+    ...query,
+    user: query.data?.getCurrentUser,
+  };
+};
 
 export const useGetUserById = (id: string) => {
   const query = useQuery({
@@ -19,6 +30,12 @@ export const useGetUserById = (id: string) => {
       graphqlClient.request(getUserByIdQuery, {
         id,
       }),
+
+    refetchInterval: 2000,
+
+    staleTime: 0,
+
+    refetchOnWindowFocus: true,
   });
 
   return {

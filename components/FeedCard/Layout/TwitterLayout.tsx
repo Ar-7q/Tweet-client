@@ -14,7 +14,7 @@ import {
 } from "react-icons/bi";
 import { useCurrentUser } from "@/hooks/user";
 import { CgOptions } from "react-icons/cg";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { graphqlClient } from "@/clients/api";
 import { verifyGoogleTokenQuery } from "@/graphql/query/user";
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
@@ -28,6 +28,10 @@ import { FaTwitch } from "react-icons/fa";
 import { SiSpacex } from "react-icons/si";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import LogoutButton from "@/components/LogoutButton";
+import { useGetAllTweets } from "@/hooks/tweet";
+import { deleteCommentMutation } from "@/graphql/mutation/tweet";
+import { MdDeleteOutline } from "react-icons/md";
 interface TwitterSidebarButton {
   title: string;
   icon: React.ReactNode;
@@ -44,12 +48,86 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
 
   const router = useRouter();
 
+  const { tweets = [] } = useGetAllTweets();
+
   const [openFollowingModal, setOpenFollowingModal] = useState(false);
 
   const [searchFollowing, setSearchFollowing] = useState("");
   const [openFollowersModal, setOpenFollowersModal] = useState(false);
 
   const [searchFollowers, setSearchFollowers] = useState("");
+
+  const [openMessagesModal, setOpenMessagesModal] = useState(false);
+
+  const [openNotificationsModal, setOpenNotificationsModal] = useState(false);
+
+  const notifications = useMemo(() => {
+    const commentNotifications =
+      [...(tweets || [])]?.flatMap((tweet: any) =>
+        tweet?.author?.id === user?.id
+          ? tweet?.comments
+              ?.filter((comment: any) => comment?.author?.id !== user?.id)
+              ?.map((comment: any) => ({
+                type: "comment",
+                ...comment,
+                tweet,
+              }))
+          : [],
+      ) || [];
+
+    const followNotifications =
+      user?.followers?.map((follow: any) => ({
+        type: "follow",
+
+        id: follow?.id,
+
+        createdAt: Date.now(),
+
+        author: follow?.follower,
+      })) || [];
+
+    return [...commentNotifications, ...followNotifications]?.sort(
+      (a: any, b: any) => Number(b?.createdAt) - Number(a?.createdAt),
+    );
+  }, [tweets, user]);
+
+  const notificationCount = notifications?.length || 0;
+  const [seenNotificationsCount, setSeenNotificationsCount] = useState(0);
+
+  const unreadNotificationsCount = notificationCount - seenNotificationsCount;
+
+  const deleteCommentMutationHook = useMutation({
+    mutationFn: async (commentId: string) => {
+      const toastId = toast.loading("Deleting comment...");
+
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        const response = await graphqlClient.request(deleteCommentMutation, {
+          commentId,
+        });
+
+        toast.success("Comment deleted 🗑️", {
+          id: toastId,
+        });
+
+        return response;
+      } catch (error) {
+        toast.error("Failed to delete comment", {
+          id: toastId,
+        });
+
+        throw error;
+      }
+    },
+
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["all-tweets"],
+      });
+    },
+  });
+
   const sidebarMenuItems: TwitterSidebarButton[] = useMemo(
     () => [
       {
@@ -65,37 +143,27 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
       {
         title: "Notifications",
         icon: <BsFillBellFill />,
-        link: "/",
+        link: "#notifications",
       },
       {
         title: "Messages",
         icon: <BsFillEnvelopeDashFill />,
-        link: "/",
+        link: "#messages",
       },
-      {
-        title: "Bookmarks",
-        icon: <BsBookmarkHeart />,
-        link: "/",
-      },
-      {
-        title: "Tweet Blue",
-        icon: <BiMoney />,
-        link: "/",
-      },
+
       {
         title: "Profile",
         icon: <BiSolidUser />,
         link: `/user/${user?.id}`,
       },
-      {
-        title: "More Options",
-        icon: <CgOptions />,
-        link: "/",
-      },
     ],
     [user?.id],
   );
-
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      await deleteCommentMutationHook.mutateAsync(commentId);
+    } catch {}
+  };
   const handleLoginwithGoogle = useCallback(
     async (cred: CredentialResponse) => {
       const googleToken = cred.credential;
@@ -152,7 +220,34 @@ relative overflow-hidden
             <ul>
               {sidebarMenuItems.map((item) => (
                 <li key={item.title}>
-                  <Link
+                  <div
+                    onClick={() => {
+                      if (item.title === "Notifications") {
+                        if (!user) {
+                          toast.error("Please login first");
+                          return;
+                        }
+
+                        setOpenNotificationsModal(true);
+
+                        setSeenNotificationsCount(notificationCount);
+
+                        return;
+                      }
+
+                      if (item.title === "Messages") {
+                        if (!user) {
+                          toast.error("Please login first");
+                          return;
+                        }
+
+                        setOpenMessagesModal(true);
+
+                        return;
+                      }
+
+                      router.push(item.link);
+                    }}
                     className="
 flex justify-center lg:justify-start
 items-center
@@ -169,88 +264,59 @@ w-full lg:w-fit
 
 mt-2 transition-all
 "
-                    href={item.link}
                   >
-                    <span className="text-xl sm:text-2xl md:text-3xl">
-                      {item.icon}
-                    </span>
+                    <div className="relative">
+                      <span className="text-xl sm:text-2xl md:text-3xl">
+                        {item.icon}
+                      </span>
+
+                      {item.title === "Notifications" &&
+                        unreadNotificationsCount > 0 && (
+                          <div
+                            className="
+absolute
+
+-top-2
+-right-2
+
+min-w-[20px]
+h-5
+
+px-1
+
+flex items-center justify-center
+
+rounded-full
+
+bg-red-500
+
+text-[10px]
+font-bold
+text-white
+
+border border-black
+
+shadow-[0_0_12px_rgba(239,68,68,0.9)]
+
+animate-pulse
+"
+                          >
+                            {unreadNotificationsCount > 99
+                              ? "99+"
+                              : unreadNotificationsCount}
+                          </div>
+                        )}
+                    </div>
+
                     <span className="hidden xl:block whitespace-nowrap">
                       {item.title}
                     </span>
-                  </Link>
+                  </div>
                 </li>
               ))}
             </ul>
             <div className="mt-5 px-3">
-              <Link href="/">
-                <button
-                  className="
-group relative overflow-hidden
-
-w-12 h-12
-sm:w-14 sm:h-14
-md:w-full md:h-auto
-
-rounded-full md:rounded-2xl
-
-py-0 md:py-2
-px-0 md:px-3
-
-flex items-center justify-center
-
-bg-gradient-to-r from-sky-500 via-blue-500 to-cyan-400
-
-shadow-[0_8px_25px_rgba(29,155,240,0.35)]
-hover:shadow-[0_12px_35px_rgba(29,155,240,0.55)]
-
-transition-all duration-300
-
-hover:scale-[1.04]
-
-mx-auto
-"
-                >
-                  {/* Shine Effect */}
-                  <span
-                    className="
-        absolute inset-0
-        translate-x-[-120%]
-        group-hover:translate-x-[120%]
-
-        bg-white/20
-        skew-x-12
-
-        transition-transform duration-1000
-      "
-                  />
-
-                  {/* Left Content */}
-
-                  <div className="relative z-10 flex justify-center items-center gap-3">
-                    <SiSpacex
-                      className="
-text-2xl
-sm:text-3xl
-md:text-5xl
-
-text-amber-300
-
-drop-shadow-[0_4px_12px_rgba(0,0,0,0.35)]
-
-transition-all duration-500 ease-out
-
-group-hover:-translate-y-1
-group-hover:rotate-[-22deg]
-group-hover:scale-110
-
-animate-pulse
-"
-                    />
-                  </div>
-
-                  {/* Space Suit Icon */}
-                </button>{" "}
-              </Link>
+              <div className="mt-5 px-3">{user && <LogoutButton />}</div>
             </div>
           </div>
           {user && (
@@ -674,6 +740,382 @@ object-cover
             </div>
           )}
         </div>
+        {openNotificationsModal && (
+          <div
+            className="
+fixed inset-0
+
+z-50
+
+flex items-center justify-center
+
+bg-black/70
+backdrop-blur-sm
+"
+          >
+            <div
+              className="
+w-[95%]
+max-w-2xl
+
+max-h-[85vh]
+
+overflow-hidden
+
+bg-[#0f0f0f]
+
+border border-slate-800
+
+rounded-3xl
+
+shadow-2xl
+"
+            >
+              {/* Header */}
+              <div
+                className="
+flex items-center justify-between
+
+p-5
+
+border-b border-slate-800
+"
+              >
+                <h1
+                  className="
+text-2xl
+
+font-bold
+
+bg-gradient-to-r
+from-yellow-300
+to-orange-400
+
+bg-clip-text
+text-transparent
+"
+                >
+                  Notifications
+                </h1>
+
+                <button
+                  onClick={() => setOpenNotificationsModal(false)}
+                  className="
+text-slate-400
+
+hover:text-white
+
+text-xl
+"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Notifications */}
+              <div
+                className="
+overflow-y-auto
+
+max-h-[70vh]
+
+p-5
+
+space-y-4
+"
+              >
+                {tweets
+                  ?.flatMap((tweet: any) =>
+                    tweet?.author?.id === user?.id
+                      ? tweet?.comments
+                          ?.filter(
+                            (comment: any) => comment?.author?.id !== user?.id,
+                          )
+                          ?.map((comment: any) => ({
+                            ...comment,
+                            tweet,
+                          }))
+                      : [],
+                  )
+                  ?.map((notification: any) => (
+                    <div
+                      key={notification?.id}
+                      className="
+bg-slate-900/70
+
+border border-slate-800
+
+rounded-2xl
+
+p-4
+
+hover:border-yellow-400/30
+
+transition-all duration-300
+"
+                    >
+                      <div className="flex items-center justify-between">
+                        <Link
+                          href={`/user/${notification?.author?.id}`}
+                          onClick={() => setOpenNotificationsModal(false)}
+                          className="
+text-yellow-300
+
+font-semibold
+
+hover:underline
+"
+                        >
+                          {notification?.author?.firstName}{" "}
+                          {notification?.author?.lastName}
+                        </Link>
+
+                        <div className="text-xs text-slate-500">
+                          {new Date(
+                            Number(notification?.createdAt),
+                          ).toLocaleString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })}
+                        </div>
+                      </div>
+
+                      <p className="mt-3 text-slate-300 text-sm">
+                        {notification?.type === "comment"
+                          ? "commented on your tweet:"
+                          : "started following you"}
+                      </p>
+
+                      {notification?.type === "comment" ? (
+                        <div
+                          className="
+mt-2
+
+bg-black/40
+
+border border-slate-800
+
+rounded-xl
+
+p-3
+
+text-sm text-slate-200
+"
+                        >
+                          {notification?.content}
+                        </div>
+                      ) : (
+                        <div
+                          className="
+mt-2
+
+flex items-center gap-2
+
+text-emerald-400
+
+text-sm
+"
+                        >
+                          ✨ New follower
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                {!tweets?.flatMap((tweet: any) =>
+                  tweet?.author?.id === user?.id
+                    ? tweet?.comments?.filter(
+                        (comment: any) => comment?.author?.id !== user?.id,
+                      )
+                    : [],
+                )?.length && (
+                  <div className="text-center text-slate-500 py-10">
+                    No notifications yet
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {openMessagesModal && (
+          <div
+            className="
+fixed inset-0
+
+z-50
+
+flex items-center justify-center
+
+bg-black/70
+backdrop-blur-sm
+"
+          >
+            <div
+              className="
+w-[95%]
+max-w-2xl
+
+max-h-[85vh]
+
+overflow-hidden
+
+bg-[#0f0f0f]
+
+border border-slate-800
+
+rounded-3xl
+
+shadow-2xl
+"
+            >
+              {/* Header */}
+              <div
+                className="
+flex items-center justify-between
+
+p-5
+
+border-b border-slate-800
+"
+              >
+                <h1
+                  className="
+text-2xl
+
+font-bold
+
+bg-gradient-to-r
+from-sky-400
+to-cyan-300
+
+bg-clip-text
+text-transparent
+"
+                >
+                  Your Comments
+                </h1>
+
+                <button
+                  onClick={() => setOpenMessagesModal(false)}
+                  className="
+text-slate-400
+
+hover:text-white
+
+text-xl
+"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Comments */}
+              <div
+                className="
+overflow-y-auto
+
+max-h-[70vh]
+
+p-5
+
+space-y-4
+"
+              >
+                {tweets
+                  ?.flatMap((tweet: any) =>
+                    tweet?.comments
+                      ?.filter((c: any) => c?.author?.id === user?.id)
+                      ?.map((c: any) => ({
+                        ...c,
+                        tweetAuthor: tweet?.author,
+                      })),
+                  )
+                  ?.map((comment: any) => (
+                    <div
+                      key={comment?.id}
+                      className="
+bg-slate-900/70
+
+border border-slate-800
+
+rounded-2xl
+
+p-4
+
+hover:border-sky-500/30
+
+transition-all duration-300
+"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Link
+                            href={`/user/${comment?.tweetAuthor?.id}`}
+                            onClick={() => setOpenMessagesModal(false)}
+                            className="
+text-sky-400
+
+font-semibold
+
+hover:underline
+"
+                          >
+                            {comment?.tweetAuthor?.firstName}{" "}
+                            {comment?.tweetAuthor?.lastName}
+                          </Link>
+
+                          <div className="text-xs text-slate-500">
+                            {new Date(
+                              Number(comment?.createdAt),
+                            ).toLocaleString("en-IN", {
+                              day: "numeric",
+                              month: "short",
+                              hour: "numeric",
+                              minute: "2-digit",
+                            })}
+                          </div>
+                        </div>
+
+                        <div
+                          onClick={() => handleDeleteComment(comment?.id)}
+                          className="
+text-orange-300
+
+cursor-pointer
+
+hover:text-red-400
+
+hover:scale-125
+
+transition-all duration-300
+"
+                        >
+                          <MdDeleteOutline size={16} />
+                        </div>
+                      </div>
+
+                      <p className="mt-3 text-slate-300 text-sm leading-relaxed">
+                        {comment?.content}
+                      </p>
+                    </div>
+                  ))}
+
+                {!tweets?.flatMap((tweet: any) =>
+                  tweet?.comments?.filter(
+                    (c: any) => c?.author?.id === user?.id,
+                  ),
+                )?.length && (
+                  <div className="text-center text-slate-500 py-10">
+                    No comments yet
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {openFollowersModal && (
           <div

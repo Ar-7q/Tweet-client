@@ -405,32 +405,106 @@ transition-all duration-300
                   <button
                     onClick={handleCreateTweet}
                     className="
-bg-sky-400
+group relative overflow-hidden
 
-text-black
+bg-gradient-to-r
+from-sky-500
+via-cyan-400
+to-blue-500
+
+text-white
 
 font-bold
-
-text-xs sm:text-sm md:text-base
-
-py-2 px-4 sm:px-5
 
 rounded-full
 
 cursor-pointer
 
+transition-all duration-500
+
 hover:scale-105
-hover:bg-sky-300
-hover:shadow-[0_0_20px_rgba(56,189,248,0.5)]
+hover:shadow-[0_0_30px_rgba(56,189,248,0.55)]
 
 active:scale-95
 
-transition-all duration-300
+w-[54px]
+hover:w-[150px]
+
+h-[54px]
+
+flex items-center justify-center
 
 whitespace-nowrap
 "
                   >
-                    Bang..🌞
+                    {/* Glow */}
+                    <span
+                      className="
+absolute inset-0
+
+bg-white/10
+
+opacity-0
+group-hover:opacity-100
+
+transition-all duration-500
+"
+                    />
+
+                    {/* Icon */}
+                    <div
+                      className="
+absolute
+
+flex items-center justify-center
+
+transition-all duration-500
+
+group-hover:opacity-0
+group-hover:scale-0
+"
+                    >
+                      <span
+                        className="
+text-2xl
+
+animate-pulse
+
+drop-shadow-lg
+"
+                      >
+                        ⚡
+                      </span>
+                    </div>
+
+                    {/* Hover Text */}
+                    <div
+                      className="
+absolute
+
+opacity-0
+scale-75
+
+group-hover:opacity-100
+group-hover:scale-100
+
+transition-all duration-500 ease-out
+"
+                    >
+                      <span
+                        className="
+tracking-[0.3em]
+
+uppercase
+
+font-extrabold
+
+text-sm
+"
+                      >
+                        Bang
+                      </span>
+                    </div>
                   </button>
                 </div>
               </div>
