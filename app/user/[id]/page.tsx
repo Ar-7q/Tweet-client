@@ -1,13 +1,20 @@
 // import Twitterlayout from "@/components/FeedCard/Layout/TwiiterLayout";
 "use client";
+import { graphqlClient } from "@/clients/api";
 import TwitterLayout from "@/components/FeedCard/Layout/TwitterLayout";
 import FeedCard from "@/components/FeedCard/page";
+import {
+  followUserMutation,
+  unfollowUserMutation,
+} from "@/graphql/mutation/user";
 import { useGetAllTweets } from "@/hooks/tweet";
 import { useCurrentUser, useGetUserById } from "@/hooks/user";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { BsArrowLeftCircleFill } from "react-icons/bs";
 
 const UserProfilePage = () => {
@@ -15,10 +22,71 @@ const UserProfilePage = () => {
   const params = useParams();
   const { refetch } = useGetAllTweets();
 
-  const { user, isLoading } = useGetUserById(params.id as string);
+  const {
+    user,
+    isLoading,
+    refetch: refetchUser,
+  } = useGetUserById(params.id as string);
   const router = useRouter();
+  const queryClient = useQueryClient();
   const isOwnProfile = currentUser?.id === user?.id;
+  const isFollowing = user?.followers?.some(
+    (follower) => follower?.follower?.id === currentUser?.id,
+  );
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const followMutation = useMutation({
+    mutationFn: async () => {
+      if (!currentUser) {
+        toast.error("Please sign in first");
+        return;
+      }
+
+      return graphqlClient.request(followUserMutation, {
+        to: user?.id as string,
+      });
+    },
+
+    onSuccess: async (response) => {
+      if (!response) return;
+
+      toast.success("User followed");
+
+      await queryClient.invalidateQueries({
+        queryKey: ["user-by-id", user?.id],
+      });
+    },
+
+    onError: () => {
+      toast.error("Failed to follow");
+    },
+  });
+
+  const unfollowMutation = useMutation({
+    mutationFn: async () => {
+      if (!currentUser) {
+        toast.error("Please sign in first");
+        return;
+      }
+
+      return graphqlClient.request(unfollowUserMutation, {
+        to: user?.id as string,
+      });
+    },
+
+    onSuccess: async (response) => {
+      if (!response) return;
+
+      toast.success("User unfollowed");
+
+      await queryClient.invalidateQueries({
+        queryKey: ["user-by-id", user?.id],
+      });
+    },
+
+    onError: () => {
+      toast.error("Failed to unfollow");
+    },
+  });
 
   if (isLoading) {
     return (
@@ -102,6 +170,67 @@ const UserProfilePage = () => {
               <h1 className="text-2xl font-semibold font-sans">
                 {user?.firstName} {user?.lastName}
               </h1>
+              <div className="flex items-center gap-5 mt-3 text-slate-400">
+                <div>
+                  <span className="font-bold text-white">
+                    {user?.followers?.length || 0}
+                  </span>{" "}
+                  Followers
+                </div>
+
+                <div>
+                  <span className="font-bold text-white">
+                    {user?.following?.length || 0}
+                  </span>{" "}
+                  Following
+                </div>
+              </div>
+
+              {!isOwnProfile && (
+                <button
+                  disabled={
+                    followMutation.isPending || unfollowMutation.isPending
+                  }
+                  onClick={() => {
+                    if (!currentUser) {
+                      toast.error("Please sign in first");
+                      return;
+                    }
+
+                    if (isFollowing) {
+                      unfollowMutation.mutate();
+                    } else {
+                      followMutation.mutate();
+                    }
+                  }}
+                  className="
+mt-5
+
+px-6 py-2
+
+rounded-full
+
+font-semibold
+
+bg-sky-500
+
+hover:bg-sky-400
+
+hover:scale-105
+
+transition-all duration-300
+
+disabled:opacity-50
+"
+                >
+                  {followMutation.isPending || unfollowMutation.isPending
+                    ? "Loading..."
+                    : isFollowing
+                      ? "Unfollow"
+                      : "Follow"}
+                </button>
+              )}
+
               <h1 className="text-md font-bold text-slate-500">
                 {user?.tweets?.length || 0} Tweets
               </h1>
@@ -218,10 +347,22 @@ animate-spin
           </div>
           <div>
             {user?.tweets
+              ?.filter((tweet) => tweet !== null)
               ?.slice()
-              ?.sort((a, b) => Number(b?.createdAt) - Number(a?.createdAt))
+              ?.sort(
+                (a, b) =>
+                  new Date(b?.createdAt || "").getTime() -
+                  new Date(a?.createdAt || "").getTime(),
+              )
               ?.map((tweet) => (
-                <FeedCard data={tweet} key={tweet?.id} refetch={refetch} />
+                <FeedCard
+                  data={tweet}
+                  key={tweet?.id}
+                  refetch={async () => {
+                    await refetch();
+                    await refetchUser();
+                  }}
+                />
               ))}
           </div>
         </div>

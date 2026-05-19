@@ -428,7 +428,7 @@ p-4
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <Link
-                        href={`/${comment?.author?.id}`}
+                        href={`/user/${comment?.author?.id}`}
                         className="
 text-sm font-semibold
 
@@ -573,7 +573,7 @@ mb-2
 "
             >
               <Link
-                href={`/${data?.author?.id}`}
+                href={`/user/${data?.author?.id}`}
                 className="
 font-semibold
 
