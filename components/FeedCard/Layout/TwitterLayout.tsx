@@ -20,12 +20,11 @@ import { verifyGoogleTokenQuery } from "@/graphql/query/user";
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 
 import toast from "react-hot-toast";
-import { useCallback, useMemo, useState } from "react";
-import { FiCheckCircle } from "react-icons/fi";
-import { FaShuttleSpace } from "react-icons/fa6";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
 import Image from "next/image";
 import { FaTwitch } from "react-icons/fa";
-import { SiSpacex } from "react-icons/si";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import LogoutButton from "@/components/LogoutButton";
@@ -62,39 +61,63 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
   const [openNotificationsModal, setOpenNotificationsModal] = useState(false);
 
   const notifications = useMemo(() => {
-    const commentNotifications =
-      [...(tweets || [])]?.flatMap((tweet: any) =>
-        tweet?.author?.id === user?.id
-          ? tweet?.comments
-              ?.filter((comment: any) => comment?.author?.id !== user?.id)
-              ?.map((comment: any) => ({
-                type: "comment",
-                ...comment,
-                tweet,
-              }))
-          : [],
-      ) || [];
-
     const followNotifications =
       user?.followers?.map((follow: any) => ({
         type: "follow",
 
         id: follow?.id,
 
-        createdAt: Date.now(),
-
+        // createdAt: Date.now(),
+        createdAt: follow?.createdAt || Date.now(),
         author: follow?.follower,
       })) || [];
 
-    return [...commentNotifications, ...followNotifications]?.sort(
+    return [...followNotifications]?.sort(
       (a: any, b: any) => Number(b?.createdAt) - Number(a?.createdAt),
     );
   }, [tweets, user]);
 
   const notificationCount = notifications?.length || 0;
-  const [seenNotificationsCount, setSeenNotificationsCount] = useState(0);
+
+  const [seenNotificationsCount, setSeenNotificationsCount] = useState(() => {
+    if (typeof window !== "undefined") {
+      return Number(localStorage.getItem("seen-notifications")) || 0;
+    }
+
+    return 0;
+  });
 
   const unreadNotificationsCount = notificationCount - seenNotificationsCount;
+
+  const messages =
+    tweets?.flatMap((tweet: any) =>
+      tweet?.author?.id === user?.id
+        ? tweet?.comments
+            ?.filter((c: any) => c?.author?.id !== user?.id)
+            ?.map((c: any) => ({
+              ...c,
+              tweetAuthor: tweet?.author,
+            }))
+        : [],
+    ) || [];
+
+  const [seenMessagesCount, setSeenMessagesCount] = useState(() => {
+    if (typeof window !== "undefined") {
+      return Number(localStorage.getItem("seen-messages")) || 0;
+    }
+
+    return 0;
+  });
+
+  const unreadMessagesCount = messages.length - seenMessagesCount;
+
+  useEffect(() => {
+    localStorage.setItem("seen-notifications", String(seenNotificationsCount));
+  }, [seenNotificationsCount]);
+
+  useEffect(() => {
+    localStorage.setItem("seen-messages", String(seenMessagesCount));
+  }, [seenMessagesCount]);
 
   const deleteCommentMutationHook = useMutation({
     mutationFn: async (commentId: string) => {
@@ -138,7 +161,7 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
       {
         title: "Explore",
         icon: <BiHash />,
-        link: "/",
+        link: "/explore",
       },
       {
         title: "Notifications",
@@ -159,11 +182,7 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
     ],
     [user?.id],
   );
-  const handleDeleteComment = async (commentId: string) => {
-    try {
-      await deleteCommentMutationHook.mutateAsync(commentId);
-    } catch {}
-  };
+  
   const handleLoginwithGoogle = useCallback(
     async (cred: CredentialResponse) => {
       const googleToken = cred.credential;
@@ -230,7 +249,8 @@ relative overflow-hidden
 
                         setOpenNotificationsModal(true);
 
-                        setSeenNotificationsCount(notificationCount);
+                        // setSeenNotificationsCount(notificationCount);
+                        setSeenNotificationsCount(notifications.length);
 
                         return;
                       }
@@ -242,6 +262,7 @@ relative overflow-hidden
                         }
 
                         setOpenMessagesModal(true);
+                        setSeenMessagesCount(messages.length);
 
                         return;
                       }
@@ -306,6 +327,30 @@ animate-pulse
                               : unreadNotificationsCount}
                           </div>
                         )}
+
+                      {item.title === "Messages" && unreadMessagesCount > 0 && (
+                        <div
+                          className="
+absolute
+
+-top-1
+-right-1
+
+w-3
+h-3
+
+rounded-full
+
+bg-red-500
+
+border border-black
+
+shadow-[0_0_10px_rgba(239,68,68,0.9)]
+
+animate-pulse
+"
+                        />
+                      )}
                     </div>
 
                     <span className="hidden xl:block whitespace-nowrap">
@@ -927,7 +972,7 @@ text-sm
                 {!tweets?.flatMap((tweet: any) =>
                   tweet?.author?.id === user?.id
                     ? tweet?.comments?.filter(
-                        (comment: any) => comment?.author?.id !== user?.id,
+                        (c: any) => c?.author?.id === user?.id,
                       )
                     : [],
                 )?.length && (
@@ -995,7 +1040,7 @@ bg-clip-text
 text-transparent
 "
                 >
-                  Your Comments
+                  Comments
                 </h1>
 
                 <button
@@ -1026,12 +1071,14 @@ space-y-4
               >
                 {tweets
                   ?.flatMap((tweet: any) =>
-                    tweet?.comments
-                      ?.filter((c: any) => c?.author?.id === user?.id)
-                      ?.map((c: any) => ({
-                        ...c,
-                        tweetAuthor: tweet?.author,
-                      })),
+                    tweet?.author?.id === user?.id
+                      ? tweet?.comments
+                          ?.filter((c: any) => c?.author?.id !== user?.id)
+                          ?.map((c: any) => ({
+                            ...c,
+                            tweetAuthor: tweet?.author,
+                          }))
+                      : [],
                   )
                   ?.map((comment: any) => (
                     <div
@@ -1079,22 +1126,7 @@ hover:underline
                           </div>
                         </div>
 
-                        <div
-                          onClick={() => handleDeleteComment(comment?.id)}
-                          className="
-text-orange-300
-
-cursor-pointer
-
-hover:text-red-400
-
-hover:scale-125
-
-transition-all duration-300
-"
-                        >
-                          <MdDeleteOutline size={16} />
-                        </div>
+                        
                       </div>
 
                       <p className="mt-3 text-slate-300 text-sm leading-relaxed">
@@ -1104,9 +1136,11 @@ transition-all duration-300
                   ))}
 
                 {!tweets?.flatMap((tweet: any) =>
-                  tweet?.comments?.filter(
-                    (c: any) => c?.author?.id === user?.id,
-                  ),
+                  tweet?.author?.id === user?.id
+                    ? tweet?.comments?.filter(
+                        (c: any) => c?.author?.id !== user?.id,
+                      )
+                    : [],
                 )?.length && (
                   <div className="text-center text-slate-500 py-10">
                     No comments yet
@@ -1173,7 +1207,7 @@ bg-clip-text
 text-transparent
 "
                 >
-                  Your Followers
+                  Followers
                 </h1>
 
                 <button
@@ -1340,7 +1374,7 @@ bg-clip-text
 text-transparent
 "
                 >
-                  Your Following
+                  Following
                 </h1>
 
                 <button
