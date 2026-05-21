@@ -26,11 +26,11 @@ import { SiMessenger } from "react-icons/si";
 
 interface FeedCardProps {
   data: NonNullable<GetAllTweetsQuery["getAllTweets"]>[0];
-  refetch: () => void;
+  
 }
 
 const FeedCard: React.FC<FeedCardProps> = (props) => {
-  const { data, refetch } = props;
+  const { data,  } = props;
   const { user } = useCurrentUser();
   const [text, setText] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -751,16 +751,6 @@ ${isAnimatingLike ? "scale-150" : "hover:scale-125"}
                   </span>
                 </div>
               </div>
-
-              {/* <div
-                className="hover:text-yellow-400
-
-hover:scale-125
-
-transition-all duration-300"
-              >
-                <BiUpload />
-              </div> */}
 
               {user?.id === data?.author?.id && (
                 <div

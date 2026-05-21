@@ -25,7 +25,7 @@ const UserProfilePage = () => {
   const {
     user,
     isLoading,
-    refetch: refetchUser,
+    
   } = useGetUserById(params.id as string);
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -51,7 +51,7 @@ const UserProfilePage = () => {
 
       toast.success("User followed");
 
-      await refetchUser();
+      
 
       await queryClient.invalidateQueries({
         queryKey: ["current-user"],
@@ -80,7 +80,7 @@ const UserProfilePage = () => {
 
       toast.success("User unfollowed");
 
-      await refetchUser();
+      
 
       await queryClient.invalidateQueries({
         queryKey: ["current-user"],
@@ -387,10 +387,7 @@ animate-spin
                 <FeedCard
                   data={tweet}
                   key={tweet?.id}
-                  refetch={async () => {
-                    await refetch();
-                    await refetchUser();
-                  }}
+                  
                 />
               ))}
           </div>

@@ -17,7 +17,7 @@ import { BiImageAdd } from "react-icons/bi";
 
 export default function Home() {
   const { user } = useCurrentUser();
-  const { tweets = [], isLoading, refetch } = useGetAllTweets();
+  const { tweets = [], isLoading } = useGetAllTweets();
   const { mutate } = useCreateTweet();
 
   // console.log(user);
@@ -513,7 +513,7 @@ text-sm
         </div>
         {tweets?.map((tweet) =>
           tweet ? (
-            <FeedCard key={tweet?.id} data={tweet} refetch={refetch} />
+            <FeedCard key={tweet?.id} data={tweet} />
           ) : null,
         )}
       </TwitterLayout>
