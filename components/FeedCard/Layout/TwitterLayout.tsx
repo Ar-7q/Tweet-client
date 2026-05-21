@@ -60,6 +60,26 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
 
   const [openNotificationsModal, setOpenNotificationsModal] = useState(false);
 
+  const [clearedNotifications, setClearedNotifications] = useState<string[]>(
+    () => {
+      if (typeof window !== "undefined") {
+        return JSON.parse(
+          localStorage.getItem("cleared-notifications") || "[]",
+        );
+      }
+
+      return [];
+    },
+  );
+
+  const [clearedMessages, setClearedMessages] = useState<string[]>(() => {
+    if (typeof window !== "undefined") {
+      return JSON.parse(localStorage.getItem("cleared-messages") || "[]");
+    }
+
+    return [];
+  });
+
   const notifications = useMemo(() => {
     const followNotifications =
       user?.followers?.map((follow: any) => ({
@@ -110,6 +130,16 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
   });
 
   const unreadMessagesCount = messages.length - seenMessagesCount;
+  useEffect(() => {
+    localStorage.setItem(
+      "cleared-notifications",
+      JSON.stringify(clearedNotifications),
+    );
+  }, [clearedNotifications]);
+
+  useEffect(() => {
+    localStorage.setItem("cleared-messages", JSON.stringify(clearedMessages));
+  }, [clearedMessages]);
 
   useEffect(() => {
     localStorage.setItem("seen-notifications", String(seenNotificationsCount));
@@ -182,7 +212,7 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
     ],
     [user?.id],
   );
-  
+
   const handleLoginwithGoogle = useCallback(
     async (cred: CredentialResponse) => {
       const googleToken = cred.credential;
@@ -210,7 +240,7 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
     <div>
       <div
         className="
-grid grid-cols-12 min-w-0
+grid grid-cols-12 min-w-0 max-w-[1700px] mx-auto
 h-screen w-full overflow-hidden
 
 px-0 sm:px-2 md:px-4 lg:px-10 xl:px-20
@@ -218,7 +248,7 @@ px-0 sm:px-2 md:px-4 lg:px-10 xl:px-20
       >
         <div
           className="
-col-span-3 sm:col-span-2 md:col-span-3 lg:col-span-3
+col-span-2 md:col-span-2 lg:col-span-3 xl:col-span-2
 
 h-screen sticky top-0
 
@@ -226,7 +256,7 @@ pt-2 px-1 sm:px-2 md:px-4
 
 flex flex-col items-center lg:items-start
 
-min-w-[72px] sm:min-w-[90px] md:min-w-[220px]
+min-w-[70px] md:min-w-[90px] lg:min-w-[220px]
 
 relative overflow-hidden
 "
@@ -353,7 +383,7 @@ animate-pulse
                       )}
                     </div>
 
-                    <span className="hidden xl:block whitespace-nowrap">
+                    <span className="hidden lg:block whitespace-nowrap">
                       {item.title}
                     </span>
                   </div>
@@ -444,7 +474,7 @@ overflow-hidden
               {/* User Info */}
               <div
                 className="
-hidden md:flex
+hidden lg:flex
 flex-col
 
 overflow-hidden
@@ -504,7 +534,7 @@ min-w-0
           className="
 feed-container
 
-col-span-9 sm:col-span-10 md:col-span-6 lg:col-span-6
+col-span-10 md:col-span-10 lg:col-span-5 xl:col-span-7
 
 h-screen overflow-y-auto
 
@@ -525,7 +555,8 @@ border-l border-r border-gray-700
 
         <div
           className="
-hidden xl:block
+hidden lg:block
+lg:col-span-4
 xl:col-span-3
 
 p-3 xl:p-5
@@ -542,7 +573,8 @@ space-y-5
           ) : (
             <div
               className="
-sticky top-5
+sticky top-4
+max-h-[95vh] overflow-y-auto
 
 bg-black/70
 
@@ -842,7 +874,42 @@ text-transparent
                 >
                   Notifications
                 </h1>
+                <button
+                  onClick={() => {
+                    const ids =
+                      tweets?.flatMap((tweet: any) =>
+                        tweet?.author?.id === user?.id
+                          ? tweet?.comments
+                              ?.filter(
+                                (comment: any) =>
+                                  comment?.author?.id !== user?.id,
+                              )
+                              ?.map((comment: any) => comment?.id)
+                          : [],
+                      ) || [];
 
+                    setClearedNotifications(ids);
+
+                    toast.success("Notifications cleared");
+                  }}
+                  className="
+px-4 py-2
+
+rounded-xl
+
+bg-red-500/10
+
+border border-red-500/30
+
+text-red-400
+
+hover:bg-red-500/20
+
+transition-all duration-300
+"
+                >
+                  Clear All
+                </button>
                 <button
                   onClick={() => setOpenNotificationsModal(false)}
                   className="
@@ -882,6 +949,10 @@ space-y-4
                           }))
                       : [],
                   )
+                  ?.filter(
+                    (notification: any) =>
+                      !clearedNotifications.includes(notification?.id),
+                  )
                   ?.map((notification: any) => (
                     <div
                       key={notification?.id}
@@ -899,7 +970,7 @@ hover:border-yellow-400/30
 transition-all duration-300
 "
                     >
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-3">
                         <Link
                           href={`/user/${notification?.author?.id}`}
                           onClick={() => setOpenNotificationsModal(false)}
@@ -1042,6 +1113,39 @@ text-transparent
                 >
                   Comments
                 </h1>
+                <button
+                  onClick={() => {
+                    const ids =
+                      tweets?.flatMap((tweet: any) =>
+                        tweet?.author?.id === user?.id
+                          ? tweet?.comments
+                              ?.filter((c: any) => c?.author?.id !== user?.id)
+                              ?.map((c: any) => c?.id)
+                          : [],
+                      ) || [];
+
+                    setClearedMessages(ids);
+
+                    toast.success("Comments cleared");
+                  }}
+                  className="
+px-4 py-2
+
+rounded-xl
+
+bg-red-500/10
+
+border border-red-500/30
+
+text-red-400
+
+hover:bg-red-500/20
+
+transition-all duration-300
+"
+                >
+                  Clear All
+                </button>
 
                 <button
                   onClick={() => setOpenMessagesModal(false)}
@@ -1079,6 +1183,9 @@ space-y-4
                             tweetAuthor: tweet?.author,
                           }))
                       : [],
+                  )
+                  ?.filter(
+                    (comment: any) => !clearedMessages.includes(comment?.id),
                   )
                   ?.map((comment: any) => (
                     <div
@@ -1125,8 +1232,6 @@ hover:underline
                             })}
                           </div>
                         </div>
-
-                        
                       </div>
 
                       <p className="mt-3 text-slate-300 text-sm leading-relaxed">
