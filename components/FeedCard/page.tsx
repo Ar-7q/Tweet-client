@@ -73,7 +73,7 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
         setIsAnimatingLike(false);
       }, 400);
 
-      await refetch();
+      
     },
 
     onError: () => {
@@ -99,7 +99,7 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
 
       setComment("");
 
-      await refetch();
+      
     },
 
     onError: () => {
@@ -134,7 +134,7 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
     },
 
     onSuccess: async () => {
-      await refetch();
+      
     },
   });
 
@@ -162,7 +162,7 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
     },
 
     onSuccess: async () => {
-      await refetch();
+      
     },
   });
 

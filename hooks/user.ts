@@ -9,11 +9,7 @@ export const useCurrentUser = () => {
 
     queryFn: () => graphqlClient.request(getCurrentUserQuery),
 
-    refetchInterval: 2000,
-
-    staleTime: 0,
-
-    refetchOnWindowFocus: true,
+    
   });
 
   return {
@@ -31,11 +27,7 @@ export const useGetUserById = (id: string) => {
         id,
       }),
 
-    refetchInterval: 2000,
-
-    staleTime: 0,
-
-    refetchOnWindowFocus: true,
+  
   });
 
   return {
