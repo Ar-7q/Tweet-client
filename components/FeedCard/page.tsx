@@ -26,11 +26,10 @@ import { SiMessenger } from "react-icons/si";
 
 interface FeedCardProps {
   data: NonNullable<GetAllTweetsQuery["getAllTweets"]>[0];
-  
 }
 
 const FeedCard: React.FC<FeedCardProps> = (props) => {
-  const { data,  } = props;
+  const { data } = props;
   const { user } = useCurrentUser();
   const [text, setText] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -72,8 +71,6 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
       setTimeout(() => {
         setIsAnimatingLike(false);
       }, 400);
-
-      
     },
 
     onError: () => {
@@ -98,8 +95,6 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
       toast.success("Comment added");
 
       setComment("");
-
-      
     },
 
     onError: () => {
@@ -133,9 +128,7 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
       }
     },
 
-    onSuccess: async () => {
-      
-    },
+    onSuccess: async () => {},
   });
 
   const deleteMutation = useMutation({
@@ -161,9 +154,7 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
       }
     },
 
-    onSuccess: async () => {
-      
-    },
+    onSuccess: async () => {},
   });
 
   useEffect(() => {
@@ -446,15 +437,18 @@ transition-all duration-300
                       </Link>
 
                       <div className="text-[10px] text-slate-500">
-                        {new Date(Number(comment?.createdAt)).toLocaleString(
-                          "en-IN",
-                          {
-                            day: "numeric",
-                            month: "short",
-                            hour: "numeric",
-                            minute: "2-digit",
-                          },
-                        )}
+                        {comment?.createdAt &&
+                        !isNaN(new Date(comment.createdAt).getTime())
+                          ? new Date(comment.createdAt).toLocaleString(
+                              "en-IN",
+                              {
+                                day: "numeric",
+                                month: "short",
+                                hour: "numeric",
+                                minute: "2-digit",
+                              },
+                            )
+                          : "just now"}
                       </div>
                     </div>
 
@@ -618,13 +612,15 @@ hover:scale-105
 transition-all duration-300
 "
                 >
-                  {new Date(Number(data.createdAt)).toLocaleString("en-IN", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                    hour: "numeric",
-                    minute: "2-digit",
-                  })}
+                  {data?.createdAt && !isNaN(new Date(data.createdAt).getTime())
+                    ? new Date(data.createdAt).toLocaleString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })
+                    : "just now"}
                 </div>
               )}
             </div>

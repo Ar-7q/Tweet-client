@@ -93,7 +93,8 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
       })) || [];
 
     return [...followNotifications]?.sort(
-      (a: any, b: any) => Number(b?.createdAt) - Number(a?.createdAt),
+      (a: any, b: any) =>
+        new Date(b?.createdAt).getTime() - new Date(a?.createdAt).getTime(),
     );
   }, [tweets, user]);
 
@@ -987,14 +988,18 @@ hover:underline
                         </Link>
 
                         <div className="text-xs text-slate-500">
-                          {new Date(
-                            Number(notification?.createdAt),
-                          ).toLocaleString("en-IN", {
-                            day: "numeric",
-                            month: "short",
-                            hour: "numeric",
-                            minute: "2-digit",
-                          })}
+                          {notification?.createdAt &&
+                          !isNaN(new Date(notification.createdAt).getTime())
+                            ? new Date(notification.createdAt).toLocaleString(
+                                "en-IN",
+                                {
+                                  day: "numeric",
+                                  month: "short",
+                                  hour: "numeric",
+                                  minute: "2-digit",
+                                },
+                              )
+                            : "just now"}
                         </div>
                       </div>
 
@@ -1222,14 +1227,18 @@ hover:underline
                           </Link>
 
                           <div className="text-xs text-slate-500">
-                            {new Date(
-                              Number(comment?.createdAt),
-                            ).toLocaleString("en-IN", {
-                              day: "numeric",
-                              month: "short",
-                              hour: "numeric",
-                              minute: "2-digit",
-                            })}
+                            {comment?.createdAt &&
+                            !isNaN(new Date(comment.createdAt).getTime())
+                              ? new Date(comment.createdAt).toLocaleString(
+                                  "en-IN",
+                                  {
+                                    day: "numeric",
+                                    month: "short",
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                  },
+                                )
+                              : "just now"}
                           </div>
                         </div>
                       </div>
