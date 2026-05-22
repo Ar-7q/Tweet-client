@@ -324,39 +324,7 @@ mt-2 transition-all
 
                       {item.title === "Notifications" &&
                         unreadNotificationsCount > 0 && (
-                          <div
-                            className="
-absolute
-
--top-2
--right-2
-
-min-w-[20px]
-h-5
-
-px-1
-
-flex items-center justify-center
-
-rounded-full
-
-bg-red-500
-
-text-[10px]
-font-bold
-text-white
-
-border border-black
-
-shadow-[0_0_12px_rgba(239,68,68,0.9)]
-
-animate-pulse
-"
-                          >
-                            {unreadNotificationsCount > 99
-                              ? "99+"
-                              : unreadNotificationsCount}
-                          </div>
+                          <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500 border border-black shadow-[0_0_10px_rgba(239,68,68,0.9)] animate-pulse" />
                         )}
 
                       {item.title === "Messages" && unreadMessagesCount > 0 && (
@@ -878,18 +846,13 @@ text-transparent
                 <button
                   onClick={() => {
                     const ids =
-                      tweets?.flatMap((tweet: any) =>
-                        tweet?.author?.id === user?.id
-                          ? tweet?.comments
-                              ?.filter(
-                                (comment: any) =>
-                                  comment?.author?.id !== user?.id,
-                              )
-                              ?.map((comment: any) => comment?.id)
-                          : [],
-                      ) || [];
+                      notifications
+                        ?.map((notification: any) => String(notification?.id))
+                        ?.filter(Boolean) || [];
 
-                    setClearedNotifications(ids);
+                    setClearedNotifications((prev) => [
+                      ...new Set([...prev, ...ids]),
+                    ]);
 
                     toast.success("Notifications cleared");
                   }}
@@ -937,26 +900,14 @@ p-5
 space-y-4
 "
               >
-                {tweets
-                  ?.flatMap((tweet: any) =>
-                    tweet?.author?.id === user?.id
-                      ? tweet?.comments
-                          ?.filter(
-                            (comment: any) => comment?.author?.id !== user?.id,
-                          )
-                          ?.map((comment: any) => ({
-                            ...comment,
-                            tweet,
-                          }))
-                      : [],
-                  )
-                  ?.filter(
+                {notifications
+                  .filter(
                     (notification: any) =>
-                      !clearedNotifications.includes(notification?.id),
+                      !clearedNotifications.includes(String(notification?.id)),
                   )
                   ?.map((notification: any) => (
                     <div
-                      key={notification?.id}
+                      key={`${notification?.type}-${notification?.id}-${notification?.author?.id}`}
                       className="
 bg-slate-900/70
 
@@ -1129,7 +1080,9 @@ text-transparent
                           : [],
                       ) || [];
 
-                    setClearedMessages(ids);
+                    setClearedMessages((prev) => [
+                      ...new Set([...prev, ...ids]),
+                    ]);
 
                     toast.success("Comments cleared");
                   }}
@@ -1190,11 +1143,12 @@ space-y-4
                       : [],
                   )
                   ?.filter(
-                    (comment: any) => !clearedMessages.includes(comment?.id),
+                    (comment: any) =>
+                      !clearedMessages.includes(String(comment?.id)),
                   )
                   ?.map((comment: any) => (
                     <div
-                      key={comment?.id}
+                      key={`${comment?.id}-${comment?.author?.id}`}
                       className="
 bg-slate-900/70
 
@@ -1249,13 +1203,10 @@ hover:underline
                     </div>
                   ))}
 
-                {!tweets?.flatMap((tweet: any) =>
-                  tweet?.author?.id === user?.id
-                    ? tweet?.comments?.filter(
-                        (c: any) => c?.author?.id !== user?.id,
-                      )
-                    : [],
-                )?.length && (
+                {notifications?.filter(
+                  (notification: any) =>
+                    !clearedNotifications.includes(notification?.id),
+                )?.length === 0 && (
                   <div className="text-center text-slate-500 py-10">
                     No comments yet
                   </div>

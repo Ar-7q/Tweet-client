@@ -9,11 +9,16 @@ import {
 } from "@/graphql/mutation/user";
 import { useGetAllTweets } from "@/hooks/tweet";
 import { useCurrentUser, useGetUserById } from "@/hooks/user";
+import {
+  getCooldownRemaining,
+  isCooldownActive,
+  startCooldown,
+} from "@/utils/cooldown";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { BsArrowLeftCircleFill } from "react-icons/bs";
 
@@ -22,11 +27,7 @@ const UserProfilePage = () => {
   const params = useParams();
   const { refetch } = useGetAllTweets();
 
-  const {
-    user,
-    isLoading,
-    
-  } = useGetUserById(params.id as string);
+  const { user, isLoading } = useGetUserById(params.id as string);
   const router = useRouter();
   const queryClient = useQueryClient();
   const isOwnProfile = currentUser?.id === user?.id;
@@ -34,6 +35,7 @@ const UserProfilePage = () => {
     (follower) => follower?.follower?.id === currentUser?.id,
   );
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [followCooldown, setFollowCooldown] = useState(0);
   const followMutation = useMutation({
     mutationFn: async () => {
       if (!currentUser) {
@@ -51,9 +53,13 @@ const UserProfilePage = () => {
 
       toast.success("User followed");
 
-      
-
       await queryClient.invalidateQueries({
+        queryKey: ["current-user"],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["user-by-id", user?.id],
+      });
+      await queryClient.refetchQueries({
         queryKey: ["current-user"],
       });
     },
@@ -80,9 +86,13 @@ const UserProfilePage = () => {
 
       toast.success("User unfollowed");
 
-      
-
       await queryClient.invalidateQueries({
+        queryKey: ["current-user"],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["user-by-id", user?.id],
+      });
+      await queryClient.refetchQueries({
         queryKey: ["current-user"],
       });
     },
@@ -91,6 +101,14 @@ const UserProfilePage = () => {
       toast.error("Failed to unfollow");
     },
   });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFollowCooldown(getCooldownRemaining(`follow:${currentUser?.id}`));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [currentUser]);
 
   if (isLoading) {
     return (
@@ -227,41 +245,33 @@ flex-wrap
                     return;
                   }
 
+                  if (isCooldownActive(`follow:${currentUser?.id}`)) {
+                    toast.error(
+                      `Please wait ${getCooldownRemaining(
+                        `follow:${currentUser?.id}`,
+                      )}s`,
+                    );
+
+                    return;
+                  }
+
+                  startCooldown(`follow:${currentUser?.id}`, 30);
+
                   if (isFollowing) {
                     unfollowMutation.mutate();
                   } else {
                     followMutation.mutate();
                   }
                 }}
-                className="
-mt-5
-
-px-8 py-2.5
-
-rounded-full
-
-font-semibold
-
-text-white
-
-bg-gradient-to-r
-from-sky-500
-to-cyan-400
-
-hover:scale-105
-
-hover:shadow-[0_0_25px_rgba(56,189,248,0.45)]
-
-transition-all duration-300
-
-disabled:opacity-50
-"
+                className="mt-5 px-8 py-2.5 rounded-full font-semibold text-white bg-gradient-to-r from-sky-500 to-cyan-400 hover:scale-105 hover:shadow-[0_0_25px_rgba(56,189,248,0.45)] transition-all duration-300 disabled:opacity-50"
               >
                 {followMutation.isPending || unfollowMutation.isPending
                   ? "Loading..."
-                  : isFollowing
-                    ? "Unfollow"
-                    : "Follow"}
+                  : followCooldown > 0
+                    ? `${followCooldown}s`
+                    : isFollowing
+                      ? "Unfollow"
+                      : "Follow"}
               </button>
             )}
           </nav>
@@ -269,15 +279,7 @@ disabled:opacity-50
             {user?.profileImageUrl && (
               <div
                 onClick={handleProfileRefresh}
-                className="
-relative
-
-w-fit
-
-cursor-pointer
-
-group
-"
+                className="relative w-fit cursor-pointer group"
               >
                 {isOwnProfile && (
                   <>
@@ -384,11 +386,7 @@ animate-spin
                   new Date(a?.createdAt || "").getTime(),
               )
               ?.map((tweet) => (
-                <FeedCard
-                  data={tweet}
-                  key={tweet?.id}
-                  
-                />
+                <FeedCard data={tweet} key={tweet?.id} />
               ))}
           </div>
         </div>

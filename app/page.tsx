@@ -7,11 +7,16 @@ import { uploadImageMutation } from "@/graphql/mutation/tweet";
 
 import { useCreateTweet, useGetAllTweets } from "@/hooks/tweet";
 import { useCurrentUser } from "@/hooks/user";
+import {
+  getCooldownRemaining,
+  isCooldownActive,
+  startCooldown,
+} from "@/utils/cooldown";
 import imageCompression from "browser-image-compression";
 
 import Image from "next/image";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { BiImageAdd } from "react-icons/bi";
 
@@ -27,6 +32,16 @@ export default function Home() {
 
   const [previewImage, setPreviewImage] = useState("");
   const [showImageModal, setShowImageModal] = useState(false);
+  const [tweetCooldown, setTweetCooldown] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTweetCooldown(getCooldownRemaining(`tweet:${user?.id}`));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [user]);
 
   const handleSelectImage = useCallback(() => {
     const input = document.createElement("input");
@@ -90,6 +105,19 @@ export default function Home() {
 
     const toastId = toast.loading("Uploading your tweet...");
 
+    if (isCooldownActive(`tweet:${user?.id}`)) {
+      toast.error(
+        `Wait ${getCooldownRemaining(
+          `tweet:${user?.id}`,
+        )}s before tweeting again`,
+      );
+
+      return;
+    }
+
+    startCooldown(`tweet:${user?.id}`, 60);
+    setIsUploading(true);
+
     try {
       let imageURL = "";
       let imagePublicId = "";
@@ -132,9 +160,10 @@ export default function Home() {
 
       setSelectedImage(null);
       setPreviewImage("");
+      setIsUploading(false);
     } catch (error) {
       console.log(error);
-
+      setIsUploading(false);
       toast.error("Failed to upload tweet ❌", {
         id: toastId,
       });
@@ -403,10 +432,18 @@ transition-all duration-300
 "
                   />
                   <button
-                    onClick={handleCreateTweet}
+                    disabled={tweetCooldown > 0 || isUploading}
+                    onClick={() => {
+                      if (tweetCooldown > 0 || isUploading) {
+                        return;
+                      }
+
+                      handleCreateTweet();
+                    }}
                     className="
 group relative overflow-hidden
-
+disabled:opacity-50
+disabled:cursor-not-allowed
 bg-gradient-to-r
 from-sky-500
 via-cyan-400
@@ -502,7 +539,11 @@ font-extrabold
 text-sm
 "
                       >
-                        Bang
+                        {isUploading
+                          ? "Uploading..."
+                          : tweetCooldown > 0
+                            ? `${tweetCooldown}s`
+                            : "Bang"}
                       </span>
                     </div>
                   </button>
@@ -512,9 +553,7 @@ text-sm
           </div>
         </div>
         {tweets?.map((tweet) =>
-          tweet ? (
-            <FeedCard key={tweet?.id} data={tweet} />
-          ) : null,
+          tweet ? <FeedCard key={tweet?.id} data={tweet} /> : null,
         )}
       </TwitterLayout>
     </div>

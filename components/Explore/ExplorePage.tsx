@@ -25,11 +25,13 @@ const ExplorePage = () => {
   const uniqueHashtags = [...new Set(hashtags)];
 
   // search users
-  const allUsers = (tweets || []).map((tweet: any) => tweet.author);
+  const allUsers = (tweets || [])
+    .map((tweet: any) => tweet.author)
+    .filter(Boolean);
 
   const uniqueUsers = allUsers.filter(
     (user: any, index: number, self: any) =>
-      index === self.findIndex((u: any) => u.id === user.id),
+      index === self.findIndex((u: any) => u?.id === user?.id),
   );
 
   const searchedUsers = uniqueUsers.filter((u: any) =>
@@ -42,7 +44,6 @@ const ExplorePage = () => {
   );
 
   return (
-    
     <div className="min-h-screen bg-black text-white">
       {/* Search Bar */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-slate-800 p-4">

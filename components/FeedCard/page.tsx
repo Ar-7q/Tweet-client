@@ -40,7 +40,10 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
 
   const [comment, setComment] = useState("");
   const [showCommentBox, setShowCommentBox] = useState(false);
-
+  const [likeCooldown, setLikeCooldown] = useState(false);
+  const [commentCooldown, setCommentCooldown] = useState(false);
+  const [deleteCommentCooldown, setDeleteCommentCooldown] = useState(false);
+  const [deleteTweetCooldown, setDeleteTweetCooldown] = useState(false);
   const likeMutation = useMutation({
     mutationFn: async () => {
       if (!user) {
@@ -162,17 +165,44 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
   }, []);
 
   const handleDeleteTweet = async () => {
+    if (deleteTweetCooldown) return;
+
+    setDeleteTweetCooldown(true);
+
+    setTimeout(() => {
+      setDeleteTweetCooldown(false);
+    }, 3000);
     await deleteMutation.mutateAsync();
 
     setShowDeleteModal(false);
   };
 
   const handleLike = async () => {
+    if (likeCooldown) {
+      toast.error("Please wait before liking again");
+      return;
+    }
+
+    setLikeCooldown(true);
+
+    setTimeout(() => {
+      setLikeCooldown(false);
+    }, 1000);
     await likeMutation.mutateAsync();
   };
 
   const handleComment = async () => {
     if (!comment.trim()) {
+      if (commentCooldown) {
+        toast.error("Please wait before commenting again");
+        return;
+      }
+
+      setCommentCooldown(true);
+
+      setTimeout(() => {
+        setCommentCooldown(false);
+      }, 5000);
       toast.error("Comment cannot be empty");
       return;
     }
@@ -194,6 +224,13 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
 
   const handleDeleteComment = async (commentId: string) => {
     try {
+      if (deleteCommentCooldown) return;
+
+      setDeleteCommentCooldown(true);
+
+      setTimeout(() => {
+        setDeleteCommentCooldown(false);
+      }, 2000);
       await deleteCommentMutationHook.mutateAsync(commentId);
     } catch {}
   };
@@ -280,10 +317,12 @@ transition-all duration-300
               </button>
 
               <button
+                disabled={deleteTweetCooldown || deleteMutation.isPending}
                 onClick={handleDeleteTweet}
                 className="
 px-4 py-2
-
+disabled:opacity-50
+disabled:cursor-not-allowed
 rounded-full
 
 bg-red-500
@@ -297,7 +336,11 @@ hover:scale-105
 transition-all duration-300
 "
               >
-                Delete
+                {deleteMutation.isPending
+                  ? "Deleting..."
+                  : deleteTweetCooldown
+                    ? "Wait..."
+                    : "Delete"}
               </button>
             </div>
           </div>
@@ -381,7 +424,7 @@ focus:border-sky-500
               />
 
               <button
-                disabled={commentMutation.isPending}
+                disabled={commentMutation.isPending || commentCooldown}
                 onClick={handleComment}
                 className="
 px-4 py-2
@@ -393,13 +436,19 @@ bg-sky-500
 text-white
 
 disabled:opacity-50
+disabled:cursor-not-allowed
+disabled:scale-95
 
 hover:bg-sky-400
 
 transition-all duration-300
 "
               >
-                {commentMutation.isPending ? "Commenting..." : "Comment"}
+                {commentMutation.isPending
+                  ? "Commenting..."
+                  : commentCooldown
+                    ? "Wait..."
+                    : "Comment"}
               </button>
             </div>
 
@@ -454,8 +503,17 @@ transition-all duration-300
 
                     {user?.id === comment?.author?.id && (
                       <div
-                        onClick={() => handleDeleteComment(comment.id)}
-                        className="
+                        onClick={() => {
+                          if (
+                            deleteCommentCooldown ||
+                            deleteCommentMutationHook.isPending
+                          ) {
+                            return;
+                          }
+
+                          handleDeleteComment(comment.id);
+                        }}
+                        className={`
 text-orange-300
 
 cursor-pointer
@@ -465,7 +523,9 @@ hover:text-red-400
 hover:scale-130
 
 transition-all duration-300
-"
+
+${deleteCommentCooldown ? "opacity-40 pointer-events-none" : ""}
+`}
                       >
                         <FiDelete size={14} />
                       </div>
@@ -726,11 +786,16 @@ transition-all duration-300"
               </div>
 
               <div
-                onClick={handleLike}
+                onClick={() => {
+                  if (likeCooldown || likeMutation.isPending) return;
+
+                  handleLike();
+                }}
                 className={`
 cursor-pointer
 
 transition-all duration-300
+${likeCooldown ? "opacity-50 cursor-not-allowed" : ""}
 
 ${liked ? "text-pink-500" : "text-slate-500"}
 
@@ -743,7 +808,7 @@ ${isAnimatingLike ? "scale-150" : "hover:scale-125"}
                   <FaHeart />
 
                   <span className="text-xs sm:text-sm">
-                    {data?.likesCount ?? 0}
+                    {likeMutation.isPending ? "..." : (data?.likesCount ?? 0)}
                   </span>
                 </div>
               </div>
