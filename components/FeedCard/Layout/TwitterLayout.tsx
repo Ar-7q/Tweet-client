@@ -1120,17 +1120,7 @@ text-xl
               </div>
 
               {/* Comments */}
-              <div
-                className="
-overflow-y-auto
-
-max-h-[70vh]
-
-p-5
-
-space-y-4
-"
-              >
+              <div className="overflow-y-auto max-h-[70vh] p-5 space-y-4">
                 {tweets
                   ?.flatMap((tweet: any) =>
                     tweet?.author?.id === user?.id
