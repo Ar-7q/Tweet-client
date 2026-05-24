@@ -1,7 +1,7 @@
 import { GraphQLClient } from "graphql-request";
 
 export const graphqlClient = new GraphQLClient(
-  "http://localhost:7000/graphql",
+  process.env.NEXT_PUBLIC_GRAPHQL_URL as string,
   {
     headers: () => {
       if (typeof window !== "undefined") {

@@ -125,7 +125,7 @@ transition-all duration-300
                   />
 
                   <Image
-                    src={u?.profileImageUrl || ""}
+                    src={u?.profileImageUrl || "/default-avatar.png"}
                     alt="user"
                     width={52}
                     height={52}

@@ -602,7 +602,7 @@ group
 "
                     >
                       <Image
-                        src={u?.profileImageUrl || ""}
+                        src={u?.profileImageUrl || "/default-avatar.png"}
                         alt="recommended-user"
                         width={55}
                         height={55}
@@ -702,7 +702,7 @@ text-transparent
                   {user?.followers?.slice(0, 5).map((f) => (
                     <Image
                       key={f?.follower?.id}
-                      src={f?.follower?.profileImageUrl || ""}
+                      src={f?.follower?.profileImageUrl || "/default-avatar.png"}
                       alt="followers-preview"
                       width={45}
                       height={45}
@@ -768,7 +768,7 @@ text-transparent
                   {user?.following?.slice(0, 5).map((f) => (
                     <Image
                       key={f?.following?.id}
-                      src={f?.following?.profileImageUrl || ""}
+                      src={f?.following?.profileImageUrl || "/default-avatar.png"}
                       alt="following-preview"
                       width={45}
                       height={45}
@@ -1346,7 +1346,7 @@ transition-all duration-300
 "
                     >
                       <Image
-                        src={f?.follower?.profileImageUrl || ""}
+                        src={f?.follower?.profileImageUrl || "/default-avatar.png"}
                         alt="followers-user"
                         width={55}
                         height={55}
@@ -1513,7 +1513,7 @@ transition-all duration-300
 "
                     >
                       <Image
-                        src={f?.following?.profileImageUrl || ""}
+                        src={f?.following?.profileImageUrl || "/default-avatar.png"}
                         alt="following-user"
                         width={55}
                         height={55}

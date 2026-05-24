@@ -85,7 +85,7 @@ transition-all
 "
               >
                 <Image
-                  src={u.profileImageUrl || ""}
+                  src={u.profileImageUrl || "/default-avatar.png"}
                   alt="user"
                   width={55}
                   height={55}
@@ -199,7 +199,7 @@ text-sky-400
                     {hashtagTweets.slice(0, 4).map((tweet: any) => (
                       <Image
                         key={tweet.id}
-                        src={tweet.author?.profileImageUrl || ""}
+                        src={tweet.author?.profileImageUrl || "/default-avatar.png"}
                         alt="user"
                         width={40}
                         height={40}

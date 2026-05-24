@@ -585,9 +585,9 @@ flex justify-center sm:justify-start
 min-w-0
 "
           >
-            {data?.author?.profileImageUrl && (
+            {data?.author?.profileImageUrl ? (
               <Image
-                src={data?.author.profileImageUrl}
+                src={data.author.profileImageUrl}
                 alt="user-image"
                 className="
 rounded-full
@@ -609,6 +609,22 @@ shrink-0
 "
                 height={50}
                 width={50}
+              />
+            ) : (
+              <div
+                className="
+h-10 w-10
+sm:h-11 sm:w-11
+md:h-12 md:w-12
+
+rounded-full
+
+bg-slate-700
+
+animate-pulse
+
+shrink-0
+"
               />
             )}
           </div>
