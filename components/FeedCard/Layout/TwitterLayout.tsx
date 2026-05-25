@@ -539,7 +539,9 @@ space-y-5
 
               <GoogleLogin
   onSuccess={handleLoginwithGoogle}
+  onError={() => toast.error("Google Login Failed")}
   useOneTap={false}
+  ux_mode="popup"
 />
             </div>
           ) : (
