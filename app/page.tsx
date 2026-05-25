@@ -3,7 +3,7 @@
 import { graphqlClient } from "@/clients/api";
 import TwitterLayout from "@/components/FeedCard/Layout/TwitterLayout";
 import FeedCard from "@/components/FeedCard/page";
-import { uploadImageMutation } from "@/graphql/mutation/tweet";
+// import { uploadImageMutation } from "@/graphql/mutation/tweet";
 
 import { useCreateTweet, useGetAllTweets } from "@/hooks/tweet";
 import { useCurrentUser } from "@/hooks/user";
@@ -76,19 +76,19 @@ export default function Home() {
     input.click();
   }, []);
 
-  const convertImageToBase64 = (file: File) => {
-    return new Promise<string>((resolve, reject) => {
-      const fileReader = new FileReader();
+  // const convertImageToBase64 = (file: File) => {
+  //   return new Promise<string>((resolve, reject) => {
+  //     const fileReader = new FileReader();
 
-      fileReader.readAsDataURL(file);
+  //     fileReader.readAsDataURL(file);
 
-      fileReader.onload = () => {
-        resolve(fileReader.result as string);
-      };
+  //     fileReader.onload = () => {
+  //       resolve(fileReader.result as string);
+  //     };
 
-      fileReader.onerror = reject;
-    });
-  };
+  //     fileReader.onerror = reject;
+  //   });
+  // };
 
   const handleCreateTweet = useCallback(async () => {
     if (!user) {
@@ -122,29 +122,66 @@ export default function Home() {
       let imageURL = "";
       let imagePublicId = "";
 
+      // if (selectedImage) {
+      //   const compressedImage = await imageCompression(selectedImage, {
+      //     maxSizeMB: 0.05,
+
+      //     maxWidthOrHeight: 600,
+
+      //     useWebWorker: true,
+
+      //     initialQuality: 0.5,
+      //   });
+
+      //   const base64 = await convertImageToBase64(compressedImage);
+
+      //   const { uploadImage } = await graphqlClient.request(
+      //     uploadImageMutation,
+      //     {
+      //       image: base64,
+      //     },
+      //   );
+
+      //   imageURL = uploadImage?.imageURL ?? "";
+      //   imagePublicId = uploadImage?.imagePublicId ?? "";
+      // }
       if (selectedImage) {
-        const compressedImage = await imageCompression(selectedImage, {
-          maxSizeMB: 0.05,
+  const compressedImage = await imageCompression(selectedImage, {
+  maxSizeMB: 0.025,
 
-          maxWidthOrHeight: 600,
+  maxWidthOrHeight: 700,
 
-          useWebWorker: true,
+  useWebWorker: true,
 
-          initialQuality: 0.5,
-        });
+  initialQuality: 0.7,
+});
 
-        const base64 = await convertImageToBase64(compressedImage);
+  const formData = new FormData();
 
-        const { uploadImage } = await graphqlClient.request(
-          uploadImageMutation,
-          {
-            image: base64,
-          },
-        );
+  formData.append("file", compressedImage);
 
-        imageURL = uploadImage?.imageURL ?? "";
-        imagePublicId = uploadImage?.imagePublicId ?? "";
-      }
+  formData.append(
+    "upload_preset",
+    process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!,
+  );
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+    {
+      method: "POST",
+      body: formData,
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Cloudinary upload failed");
+  }
+
+  const data = await response.json();
+
+  imageURL = data.secure_url;
+  imagePublicId = data.public_id;
+}
 
       await mutate({
         content,

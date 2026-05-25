@@ -15,7 +15,6 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  */
 type Documents = {
     "\n  #graphql\n\n  mutation CreateTweet($payload: CreateTweetData!) {\n    createTweet(payload: $payload) {\n      id\n    }\n  }\n": typeof types.CreateTweetDocument,
-    "\n  #graphql\n\n  mutation UploadImage($image: String!) {\n    uploadImage(image: $image) {\n      imageURL\n      imagePublicId\n    }\n  }\n": typeof types.UploadImageDocument,
     "\n  #graphql\n\n  mutation DeleteTweet($tweetId: String!) {\n    deleteTweet(tweetId: $tweetId)\n  }\n": typeof types.DeleteTweetDocument,
     "\n  #graphql\n\n  mutation ToggleLike($tweetId: String!) {\n    toggleLike(tweetId: $tweetId)\n  }\n": typeof types.ToggleLikeDocument,
     "\n  #graphql\n\n  mutation CreateComment($tweetId: String!, $content: String!) {\n    createComment(tweetId: $tweetId, content: $content) {\n      id\n      content\n      createdAt\n    }\n  }\n": typeof types.CreateCommentDocument,
@@ -36,7 +35,6 @@ type Documents = {
 };
 const documents: Documents = {
     "\n  #graphql\n\n  mutation CreateTweet($payload: CreateTweetData!) {\n    createTweet(payload: $payload) {\n      id\n    }\n  }\n": types.CreateTweetDocument,
-    "\n  #graphql\n\n  mutation UploadImage($image: String!) {\n    uploadImage(image: $image) {\n      imageURL\n      imagePublicId\n    }\n  }\n": types.UploadImageDocument,
     "\n  #graphql\n\n  mutation DeleteTweet($tweetId: String!) {\n    deleteTweet(tweetId: $tweetId)\n  }\n": types.DeleteTweetDocument,
     "\n  #graphql\n\n  mutation ToggleLike($tweetId: String!) {\n    toggleLike(tweetId: $tweetId)\n  }\n": types.ToggleLikeDocument,
     "\n  #graphql\n\n  mutation CreateComment($tweetId: String!, $content: String!) {\n    createComment(tweetId: $tweetId, content: $content) {\n      id\n      content\n      createdAt\n    }\n  }\n": types.CreateCommentDocument,
@@ -74,10 +72,6 @@ export function graphql(source: string): unknown;
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  #graphql\n\n  mutation CreateTweet($payload: CreateTweetData!) {\n    createTweet(payload: $payload) {\n      id\n    }\n  }\n"): (typeof documents)["\n  #graphql\n\n  mutation CreateTweet($payload: CreateTweetData!) {\n    createTweet(payload: $payload) {\n      id\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  #graphql\n\n  mutation UploadImage($image: String!) {\n    uploadImage(image: $image) {\n      imageURL\n      imagePublicId\n    }\n  }\n"): (typeof documents)["\n  #graphql\n\n  mutation UploadImage($image: String!) {\n    uploadImage(image: $image) {\n      imageURL\n      imagePublicId\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

@@ -9,16 +9,16 @@ export const createTweetMutation = graphql(`
   }
 `);
 
-export const uploadImageMutation = graphql(`
-  #graphql
+// export const uploadImageMutation = graphql(`
+//   #graphql
 
-  mutation UploadImage($image: String!) {
-    uploadImage(image: $image) {
-      imageURL
-      imagePublicId
-    }
-  }
-`);
+//   mutation UploadImage($image: String!) {
+//     uploadImage(image: $image) {
+//       imageURL
+//       imagePublicId
+//     }
+//   }
+// `);
 
 export const deleteTweetMutation = graphql(`
   #graphql
