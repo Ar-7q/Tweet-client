@@ -540,8 +540,6 @@ space-y-5
               <GoogleLogin
   onSuccess={handleLoginwithGoogle}
   useOneTap={false}
-  ux_mode="redirect"
-  login_uri="https://koo-xi.vercel.app"
 />
             </div>
           ) : (
