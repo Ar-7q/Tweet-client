@@ -579,7 +579,7 @@ bg-clip-text
 text-transparent
 "
               >
-                Recommended Users
+                Recommend Users
               </h1>
 
               <div className="space-y-4">
