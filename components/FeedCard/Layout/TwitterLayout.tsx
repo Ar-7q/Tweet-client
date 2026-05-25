@@ -537,7 +537,11 @@ space-y-5
             <div className="p-5 bg-slate-700 rounded-lg">
               <h1 className="my-2 text-2xl">New User 🧰</h1>
 
-              <GoogleLogin onSuccess={handleLoginwithGoogle} />
+              <GoogleLogin
+  onSuccess={handleLoginwithGoogle}
+  useOneTap={false}
+  ux_mode="redirect"
+/>
             </div>
           ) : (
             <div

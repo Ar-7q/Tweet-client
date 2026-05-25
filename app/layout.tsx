@@ -9,9 +9,13 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Koo",
-  description: "Blogging Shairng next app",
+  description: "Tooting Sharing next app",
   icons: {
     icon: "/amy.png",
+  },
+
+  other: {
+    "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
   },
 };
 
@@ -22,6 +26,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
+      <head>
+    <meta
+      httpEquiv="Cross-Origin-Opener-Policy"
+      content="same-origin-allow-popups"
+    />
+  </head>
       <body className={`${inter.className} min-h-full flex flex-col`}>
         <Providers>{children}</Providers>
       </body>
