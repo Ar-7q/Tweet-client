@@ -497,7 +497,7 @@ transition-all duration-300
                                 minute: "2-digit",
                               },
                             )
-                          : "just now"}
+                          : "..."}
                       </div>
                     </div>
 
@@ -696,7 +696,7 @@ transition-all duration-300
                         hour: "numeric",
                         minute: "2-digit",
                       })
-                    : "just now"}
+                    : "..."}
                 </div>
               )}
             </div>
