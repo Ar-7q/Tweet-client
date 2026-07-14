@@ -791,7 +791,7 @@ cursor-pointer
                   </span>
                 </div>
               </div>
-              <div
+              {/* <div
                 className="hover:text-green-400
 
 hover:scale-125
@@ -799,7 +799,7 @@ hover:scale-125
 transition-all duration-300"
               >
                 <FaRetweet />
-              </div>
+              </div> */}
 
               <div
                 onClick={() => {
