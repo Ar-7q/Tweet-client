@@ -43,9 +43,29 @@ export const useTweetLikeSubscription = () => {
           queryClient.invalidateQueries({
             queryKey: ["current-user"],
           });
-          queryClient.invalidateQueries({
-            queryKey: ["user-by-id"],
-          });
+          queryClient.setQueriesData(
+            {
+              queryKey: ["user-by-id"],
+            },
+            (oldData: any) => {
+              if (!oldData?.getUserById) return oldData;
+
+              return {
+                ...oldData,
+                getUserById: {
+                  ...oldData.getUserById,
+                  tweets: (oldData.getUserById.tweets || []).map((tweet: any) =>
+                    tweet.id === event.tweetId
+                      ? {
+                          ...tweet,
+                          likesCount: event.likesCount,
+                        }
+                      : tweet,
+                  ),
+                },
+              };
+            },
+          );
         },
 
         error: console.error,
@@ -97,9 +117,29 @@ export const useCommentSubscription = () => {
             queryKey: ["current-user"],
           });
 
-          queryClient.invalidateQueries({
-            queryKey: ["user-by-id"],
-          });
+          queryClient.setQueriesData(
+            {
+              queryKey: ["user-by-id"],
+            },
+            (oldData: any) => {
+              if (!oldData?.getUserById) return oldData;
+
+              return {
+                ...oldData,
+                getUserById: {
+                  ...oldData.getUserById,
+                  tweets: (oldData.getUserById.tweets || []).map((tweet: any) =>
+                    tweet.id === event.tweetId
+                      ? {
+                          ...tweet,
+                          comments: [...(tweet.comments || []), event.comment],
+                        }
+                      : tweet,
+                  ),
+                },
+              };
+            },
+          );
         },
 
         error: console.error,
@@ -242,9 +282,29 @@ export const useCommentDeleteSubscription = () => {
             queryKey: ["current-user"],
           });
 
-          queryClient.invalidateQueries({
-            queryKey: ["user-by-id"],
-          });
+          queryClient.setQueriesData(
+            {
+              queryKey: ["user-by-id"],
+            },
+            (oldData: any) => {
+              if (!oldData?.getUserById) return oldData;
+
+              return {
+                ...oldData,
+                getUserById: {
+                  ...oldData.getUserById,
+                  tweets: (oldData.getUserById.tweets || []).map((tweet: any) =>
+                    tweet.id === event.tweetId
+                      ? {
+                          ...tweet,
+                          comments: tweet.comments.filter((comment: any) => comment.id !== event.commentId),
+                        }
+                      : tweet,
+                  ),
+                },
+              };
+            },
+          );
         },
 
         error: console.error,
