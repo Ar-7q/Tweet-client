@@ -138,6 +138,14 @@ export const useTweetCreateSubscription = () => {
               getAllTweets: [event, ...oldData.getAllTweets],
             };
           });
+
+          queryClient.invalidateQueries({
+            queryKey: ["current-user"],
+          });
+
+          queryClient.invalidateQueries({
+            queryKey: ["user-by-id"],
+          });
         },
 
         error: console.error,
@@ -173,10 +181,16 @@ export const useTweetDeleteSubscription = () => {
             return {
               ...oldData,
 
-              getAllTweets: oldData.getAllTweets.filter(
-                (tweet: any) => tweet.id !== event.tweetId,
-              ),
+              getAllTweets: oldData.getAllTweets.filter((tweet: any) => tweet.id !== event.tweetId),
             };
+          });
+
+          queryClient.invalidateQueries({
+            queryKey: ["current-user"],
+          });
+
+          queryClient.invalidateQueries({
+            queryKey: ["user-by-id"],
           });
         },
 
@@ -218,9 +232,7 @@ export const useCommentDeleteSubscription = () => {
                   ? {
                       ...tweet,
 
-                      comments: tweet.comments.filter(
-                        (comment: any) => comment.id !== event.commentId,
-                      ),
+                      comments: tweet.comments.filter((comment: any) => comment.id !== event.commentId),
                     }
                   : tweet,
               ),
