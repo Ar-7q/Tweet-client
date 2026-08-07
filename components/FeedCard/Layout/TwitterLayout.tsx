@@ -228,17 +228,27 @@ px-0 sm:px-2 md:px-4 lg:px-10 xl:px-20
       >
         <div
           className="
-col-span-2 md:col-span-2 lg:col-span-3 xl:col-span-2
+col-span-2
+sm:col-span-2
+md:col-span-2
+lg:col-span-3
+xl:col-span-2
 
-h-screen sticky top-0
+h-screen
+sticky top-0
 
-pt-2 px-1 sm:px-2 md:px-4
+pt-2
+px-1 sm:px-2 md:px-4
 
-flex flex-col items-center lg:items-start
+flex flex-col
+items-center lg:items-start
 
-min-w-[70px] md:min-w-[90px] lg:min-w-[220px]
+min-w-[70px]
+md:min-w-[90px]
+lg:min-w-[220px]
 
-relative overflow-hidden
+relative
+overflow-hidden
 "
         >
           {/* twitter image from react icons */}
@@ -486,20 +496,25 @@ min-w-0
           className="
 feed-container
 
-col-span-10 md:col-span-10 lg:col-span-5 xl:col-span-7
+col-span-7
+sm:col-span-7
+md:col-span-8
+lg:col-span-5
+xl:col-span-7
 
-h-screen overflow-y-auto
+h-screen
+overflow-y-auto
 
 scrollbar-thin
 scrollbar-thumb-gray-700
 scrollbar-track-transparent
-hover:scrollbar-thumb-gray-600
 
-scroll-smooth
+w-full
+min-w-0
 
-w-full min-w-0
-
-border-l border-r border-gray-700
+border-l
+border-r
+border-gray-700
 "
         >
           {props.children}
@@ -507,29 +522,41 @@ border-l border-r border-gray-700
 
         <div
           className="
-    hidden
-    lg:block
-    lg:col-span-4
-    xl:col-span-3
-    p-3
-    xl:p-5
-    space-y-5
-  "
+block
+
+col-span-3
+sm:col-span-3
+md:col-span-2
+lg:col-span-4
+xl:col-span-3
+
+p-1
+sm:p-2
+lg:p-3
+xl:p-5
+
+space-y-3
+lg:space-y-5
+"
         >
           {!user ? (
             <div
-              className="hidden
+              className="block
             lg:block
-            lg:top-4
-            lg:col-span-4
-            md:col-span-3
-            sm:col-span-2
-
-            p-5
+          
+            p-2
+sm:p-3
+lg:p-5
             bg-slate-700
             rounded-lg"
             >
-              <h1 className="my-2 text-2xl">New User 🧰</h1>
+              <h1
+                className="my-2 text-sm
+sm:text-lg
+lg:text-2xl"
+              >
+                New User 🧰
+              </h1>
 
               <GoogleLogin
                 onSuccess={handleLoginwithGoogle}
@@ -541,18 +568,18 @@ border-l border-r border-gray-700
           ) : (
             <div
               className="
-               hidden
-            lg:block
+block
 sticky top-4
-max-h-[95vh] overflow-y-auto
+max-h-[95vh]
+overflow-y-auto
 
 bg-black/70
-
 border border-slate-800
-
 rounded-2xl
 
-p-5
+p-2
+sm:p-3
+lg:p-5
 
 backdrop-blur-xl
 
@@ -561,7 +588,9 @@ shadow-[0_0_25px_rgba(56,189,248,0.08)]
             >
               <h1
                 className="
-text-2xl
+text-sm
+sm:text-lg
+lg:text-2xl
 
 font-bold
 
@@ -605,8 +634,8 @@ group
                       <Image
                         src={u?.profileImageUrl || "/default-avatar.png"}
                         alt="recommended-user"
-                        width={55}
-                        height={55}
+                        width={40}
+                        height={40}
                         className="
 rounded-full
 
@@ -624,10 +653,12 @@ transition-all duration-300
                         <h1
                           className="
 font-semibold
-
 text-white
-
 truncate
+
+text-[10px]
+sm:text-xs
+lg:text-base
 "
                         >
                           {u?.firstName} {u?.lastName}
@@ -635,7 +666,9 @@ truncate
 
                         <p
                           className="
-text-sm
+text-[9px]
+sm:text-xs
+lg:text-sm
 
 text-slate-400
 "
@@ -661,7 +694,9 @@ border border-slate-800
 
 rounded-2xl
 
-p-5
+p-2
+sm:p-3
+lg:p-5
 
 backdrop-blur-xl
 
@@ -676,7 +711,9 @@ transition-all duration-300
               >
                 <h1
                   className="
-text-2xl
+text-sm
+sm:text-lg
+lg:text-2xl
 
 font-bold
 
@@ -701,8 +738,8 @@ text-transparent
                       key={f?.follower?.id}
                       src={f?.follower?.profileImageUrl || "/default-avatar.png"}
                       alt="followers-preview"
-                      width={45}
-                      height={45}
+                      width={32}
+                      height={32}
                       className="
 rounded-full
 
@@ -725,7 +762,9 @@ border border-slate-800
 
 rounded-2xl
 
-p-5
+p-2
+sm:p-3
+lg:p-5
 
 backdrop-blur-xl
 
