@@ -3,22 +3,17 @@
 import { graphqlClient } from "@/clients/api";
 import TwitterLayout from "@/components/FeedCard/Layout/TwitterLayout";
 import FeedCard from "@/components/FeedCard/page";
-import {
-  followUserMutation,
-  unfollowUserMutation,
-} from "@/graphql/mutation/user";
+import { followUserMutation, unfollowUserMutation } from "@/graphql/mutation/user";
+import { verifyGoogleTokenQuery } from "@/graphql/query/user";
 import { useGetAllTweets } from "@/hooks/tweet";
 import { useCurrentUser, useGetUserById } from "@/hooks/user";
-import {
-  getCooldownRemaining,
-  isCooldownActive,
-  startCooldown,
-} from "@/utils/cooldown";
+import { getCooldownRemaining, isCooldownActive, startCooldown } from "@/utils/cooldown";
+import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { BsArrowLeftCircleFill } from "react-icons/bs";
 
@@ -31,9 +26,7 @@ const UserProfilePage = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isOwnProfile = currentUser?.id === user?.id;
-  const isFollowing = user?.followers?.some(
-    (follower) => follower?.follower?.id === currentUser?.id,
-  );
+  const isFollowing = user?.followers?.some((follower) => follower?.follower?.id === currentUser?.id);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [followCooldown, setFollowCooldown] = useState(0);
   const followMutation = useMutation({
@@ -102,6 +95,26 @@ const UserProfilePage = () => {
     },
   });
 
+  const handleLoginwithGoogle = useCallback(
+    async (cred: CredentialResponse) => {
+      const googleToken = cred.credential;
+      if (!googleToken) return toast.error(`Google token not found`);
+
+      const { verifyGoogleToken } = await graphqlClient.request(verifyGoogleTokenQuery, { token: googleToken });
+
+      toast.success(`Verified Success`);
+      console.log(verifyGoogleToken);
+      if (verifyGoogleToken) {
+        window.localStorage.setItem("_tweet_token", verifyGoogleToken);
+      }
+
+      await queryClient.invalidateQueries({
+        queryKey: ["current-user"],
+      });
+    },
+    [queryClient],
+  );
+
   useEffect(() => {
     const interval = setInterval(() => {
       setFollowCooldown(getCooldownRemaining(`follow:${currentUser?.id}`));
@@ -137,26 +150,16 @@ const UserProfilePage = () => {
     return (
       <TwitterLayout>
         <div className="flex flex-col items-center justify-center h-screen text-center px-4">
-          <h1 className="text-3xl font-bold text-white">User Not Found</h1>
+          <h1 className="text-3xl font-bold text-white">Sign in to view your profile</h1>
 
-          <p className="text-slate-400 mt-3 text-sm sm:text-base">
-            The profile you are looking for does not exist.
-          </p>
+          <p className="text-slate-400 mt-3 mb-6">Login with Google to access your profile.</p>
 
-          <button
-            onClick={() => router.push("/")}
-            className="
-              mt-6
-              bg-blue-500
-              hover:bg-blue-600
-              transition-all
-              px-5 py-2
-              rounded-full
-              font-semibold
-            "
-          >
-            Go Home
-          </button>
+          <GoogleLogin
+            onSuccess={handleLoginwithGoogle}
+            onError={() => toast.error("Google Login Failed")}
+            useOneTap={false}
+            ux_mode="popup"
+          />
         </div>
       </TwitterLayout>
     );
@@ -198,9 +201,7 @@ transition-all duration-200
                   {user?.firstName} {user?.lastName}
                 </h1>
 
-                <p className="text-slate-400 text-sm">
-                  {user?.tweets?.length || 0} Tweets
-                </p>
+                <p className="text-slate-400 text-sm">{user?.tweets?.length || 0} Tweets</p>
               </div>
             </div>
 
@@ -217,17 +218,13 @@ flex-wrap
 "
             >
               <div className="flex flex-col items-center">
-                <span className="text-white font-bold text-lg">
-                  {user?.followers?.length || 0}
-                </span>
+                <span className="text-white font-bold text-lg">{user?.followers?.length || 0}</span>
 
                 <span className="text-slate-400 text-sm">Followers</span>
               </div>
 
               <div className="flex flex-col items-center">
-                <span className="text-white font-bold text-lg">
-                  {user?.following?.length || 0}
-                </span>
+                <span className="text-white font-bold text-lg">{user?.following?.length || 0}</span>
 
                 <span className="text-slate-400 text-sm">Following</span>
               </div>
@@ -236,9 +233,7 @@ flex-wrap
             {/* Follow Button */}
             {!isOwnProfile && (
               <button
-                disabled={
-                  followMutation.isPending || unfollowMutation.isPending
-                }
+                disabled={followMutation.isPending || unfollowMutation.isPending}
                 onClick={() => {
                   if (!currentUser) {
                     toast.error("Please sign in first");
@@ -246,11 +241,7 @@ flex-wrap
                   }
 
                   if (isCooldownActive(`follow:${currentUser?.id}`)) {
-                    toast.error(
-                      `Please wait ${getCooldownRemaining(
-                        `follow:${currentUser?.id}`,
-                      )}s`,
-                    );
+                    toast.error(`Please wait ${getCooldownRemaining(`follow:${currentUser?.id}`)}s`);
 
                     return;
                   }
@@ -277,10 +268,7 @@ flex-wrap
           </nav>
           <div className="p-4 border-b border-amber-950">
             {user?.profileImageUrl && (
-              <div
-                onClick={handleProfileRefresh}
-                className="relative w-fit cursor-pointer group"
-              >
+              <div onClick={handleProfileRefresh} className="relative w-fit cursor-pointer group">
                 {isOwnProfile && (
                   <>
                     <div
@@ -380,11 +368,7 @@ animate-spin
             {user?.tweets
               ?.filter((tweet) => tweet !== null)
               ?.slice()
-              ?.sort(
-                (a, b) =>
-                  new Date(b?.createdAt || "").getTime() -
-                  new Date(a?.createdAt || "").getTime(),
-              )
+              ?.sort((a, b) => new Date(b?.createdAt || "").getTime() - new Date(a?.createdAt || "").getTime())
               ?.map((tweet) => (
                 <FeedCard data={tweet} key={tweet?.id} />
               ))}

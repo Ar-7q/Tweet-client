@@ -190,7 +190,7 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
       {
         title: "Profile",
         icon: <BiSolidUser />,
-        link: `/user/${user?.id}`,
+        link: "/profile",
       },
     ],
     [user?.id],
@@ -274,6 +274,16 @@ relative overflow-hidden
                         setOpenMessagesModal(true);
                         setSeenMessagesCount(messages.length);
 
+                        return;
+                      }
+
+                      if (item.title === "Profile") {
+                        if (!user) {
+                          router.push("/user/undefined");
+                          return;
+                        }
+
+                        router.push(`/user/${user.id}`);
                         return;
                       }
 
