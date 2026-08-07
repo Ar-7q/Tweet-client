@@ -333,6 +333,22 @@ animate-pulse
                 </li>
               ))}
             </ul>
+
+            {/* Mobile Login Button */}
+            {!user && (
+              <div className="flex justify-center lg:hidden mt-6">
+                <GoogleLogin
+                  onSuccess={handleLoginwithGoogle}
+                  onError={() => toast.error("Google Login Failed")}
+                  useOneTap={false}
+                  ux_mode="popup"
+                  shape="circle"
+                  theme="filled_blue"
+                  size="large"
+                />
+              </div>
+            )}
+
             <div className="mt-5 px-3">
               <div className="mt-5 px-3">{user && <LogoutButton />}</div>
             </div>
@@ -496,10 +512,12 @@ border-l border-r border-gray-700
 
         <div
           className="
-    col-span-12
+    hidden
+    lg:block
     lg:col-span-4
     xl:col-span-3
-    p-3 xl:p-5
+    p-3
+    xl:p-5
     space-y-5
   "
         >
