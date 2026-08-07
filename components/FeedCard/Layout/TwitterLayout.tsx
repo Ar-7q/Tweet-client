@@ -508,9 +508,12 @@ border-l border-r border-gray-700
         >
           {!user ? (
             <div
-              className="block
-            lg:sticky
+              className="hidden
+            lg:block
             lg:top-4
+            lg:col-span-4
+            md:col-span-3
+            sm:col-span-2
 
             p-5
             bg-slate-700
