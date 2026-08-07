@@ -46,6 +46,9 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
 
   const [searchFollowers, setSearchFollowers] = useState("");
 
+  const [openRecommendedModal, setOpenRecommendedModal] = useState(false);
+  const [searchRecommended, setSearchRecommended] = useState("");
+
   const [openMessagesModal, setOpenMessagesModal] = useState(false);
 
   const [openNotificationsModal, setOpenNotificationsModal] = useState(false);
@@ -607,80 +610,30 @@ text-transparent
                 Recommend Users
               </h1>
 
-              <div className="space-y-4">
-                {user?.recommendedUsers?.length ? (
-                  user.recommendedUsers.map((u) => (
-                    <div
-                      key={u?.id}
-                      onClick={() => router.push(`/user/${u?.id}`)}
-                      className="
-flex items-center gap-3
-
-cursor-pointer
-
-hover:bg-slate-900/80
-
-p-3
-
-rounded-2xl
-
-transition-all duration-300
-
-hover:scale-[1.02]
-
-group
-"
-                    >
+              <div onClick={() => setOpenRecommendedModal(true)} className="mt-4 cursor-pointer">
+                <div className="flex items-center -space-x-3">
+                  {user?.recommendedUsers
+                    ?.filter((u) => u)
+                    .slice(0, 2)
+                    .map((u) => (
                       <Image
-                        src={u?.profileImageUrl || "/default-avatar.png"}
-                        alt="recommended-user"
-                        width={40}
-                        height={40}
-                        className="
-rounded-full
-
-border border-slate-700
-
-object-cover
-
-group-hover:scale-105
-
-transition-all duration-300
-"
+                        key={u!.id}
+                        src={u!.profileImageUrl || "/default-avatar.png"}
+                        alt="recommended"
+                        width={32}
+                        height={32}
+                        className="rounded-full border-2 border-black object-cover"
                       />
+                    ))}
 
-                      <div className="overflow-hidden">
-                        <h1
-                          className="
-font-semibold
-text-white
-truncate
-
-text-[10px]
-sm:text-xs
-lg:text-base
-"
-                        >
-                          {u?.firstName} {u?.lastName}
-                        </h1>
-
-                        <p
-                          className="
-text-[9px]
-sm:text-xs
-lg:text-sm
-
-text-slate-400
-"
-                        >
-                          Suggested for you
-                        </p>
-                      </div>
+                  {(user?.recommendedUsers?.filter((u) => u).length ?? 0) > 2 && (
+                    <div className="ml-2 h-8 w-8 rounded-full bg-cyan-500 border-2 border-black flex items-center justify-center text-[10px] font-bold text-white">
+                      +{(user?.recommendedUsers?.filter((u) => u).length ?? 0) - 2}
                     </div>
-                  ))
-                ) : (
-                  <div className="text-slate-500 text-sm">No recommendations yet</div>
-                )}
+                  )}
+                </div>
+
+                <p className="mt-3 text-slate-400 text-sm">Click to view all users</p>
               </div>
 
               <div
@@ -1531,6 +1484,171 @@ border border-slate-700
                       </div>
                     </div>
                   ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {openRecommendedModal && (
+          <div
+            className="
+fixed inset-0
+
+z-50
+
+flex items-center justify-center
+
+bg-black/70
+
+backdrop-blur-sm
+"
+          >
+            <div
+              className="
+w-[95%]
+max-w-md
+
+max-h-[80vh]
+
+overflow-hidden
+
+bg-[#0f0f0f]
+
+border border-slate-800
+
+rounded-3xl
+
+shadow-2xl
+"
+            >
+              {/* Header */}
+              <div
+                className="
+flex items-center justify-between
+
+p-5
+
+border-b border-slate-800
+"
+              >
+                <h1
+                  className="
+text-2xl
+
+font-bold
+
+bg-gradient-to-r
+from-sky-400
+to-cyan-300
+
+bg-clip-text
+text-transparent
+"
+                >
+                  Recommended Users ({user?.recommendedUsers?.filter((u) => u).length ?? 0})
+                </h1>
+
+                <button
+                  onClick={() => setOpenRecommendedModal(false)}
+                  className="
+text-slate-400
+
+hover:text-white
+
+text-xl
+"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Search
+              <div className="p-4 border-b border-slate-800">
+                <input
+                  value={searchRecommended}
+                  onChange={(e) => setSearchRecommended(e.target.value)}
+                  placeholder="Search recommended users..."
+                  className="
+w-full
+
+bg-black
+
+border border-slate-700
+
+rounded-xl
+
+px-4 py-3
+
+outline-none
+
+focus:border-sky-500
+
+text-white
+"
+                />
+              </div> */}
+
+              {/* Users */}
+              <div
+                className="
+overflow-y-auto
+
+max-h-[55vh]
+
+p-4
+
+space-y-4
+"
+              >
+                {user?.recommendedUsers
+                  ?.filter((u) => u)
+                  .map((u) => (
+                    <div
+                      key={u!.id}
+                      onClick={() => {
+                        router.push(`/user/${u!.id}`);
+
+                        setOpenRecommendedModal(false);
+                      }}
+                      className="
+flex items-center gap-3
+
+cursor-pointer
+
+hover:bg-slate-900
+
+p-3
+
+rounded-2xl
+
+transition-all duration-300
+"
+                    >
+                      <Image
+                        src={u!.profileImageUrl || "/default-avatar.png"}
+                        alt="user"
+                        width={32}
+                        height={32}
+                        className="
+rounded-full
+
+object-cover
+
+border border-slate-700
+"
+                      />
+
+                      <div>
+                        <h1 className="font-semibold text-white">
+                          {u!.firstName} {u!.lastName}
+                        </h1>
+                      </div>
+                    </div>
+                  ))}
+
+                {(user?.recommendedUsers?.filter((u) => u).length ?? 0) === 0 && (
+                  <div className="text-center text-slate-500 py-10">No recommended users found</div>
+                )}
               </div>
             </div>
           </div>
