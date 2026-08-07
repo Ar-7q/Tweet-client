@@ -1,17 +1,7 @@
 "use client";
-import {
-  BsBookmarkHeart,
-  BsFillBellFill,
-  BsFillEnvelopeDashFill,
-} from "react-icons/bs";
+import { BsBookmarkHeart, BsFillBellFill, BsFillEnvelopeDashFill } from "react-icons/bs";
 
-import {
-  BiHash,
-  BiHomeCircle,
-  BiImageAdd,
-  BiMoney,
-  BiSolidUser,
-} from "react-icons/bi";
+import { BiHash, BiHomeCircle, BiImageAdd, BiMoney, BiSolidUser } from "react-icons/bi";
 import { useCurrentUser } from "@/hooks/user";
 import { CgOptions } from "react-icons/cg";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -60,17 +50,13 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
 
   const [openNotificationsModal, setOpenNotificationsModal] = useState(false);
 
-  const [clearedNotifications, setClearedNotifications] = useState<string[]>(
-    () => {
-      if (typeof window !== "undefined") {
-        return JSON.parse(
-          localStorage.getItem("cleared-notifications") || "[]",
-        );
-      }
+  const [clearedNotifications, setClearedNotifications] = useState<string[]>(() => {
+    if (typeof window !== "undefined") {
+      return JSON.parse(localStorage.getItem("cleared-notifications") || "[]");
+    }
 
-      return [];
-    },
-  );
+    return [];
+  });
 
   const [clearedMessages, setClearedMessages] = useState<string[]>(() => {
     if (typeof window !== "undefined") {
@@ -93,8 +79,7 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
       })) || [];
 
     return [...followNotifications]?.sort(
-      (a: any, b: any) =>
-        new Date(b?.createdAt).getTime() - new Date(a?.createdAt).getTime(),
+      (a: any, b: any) => new Date(b?.createdAt).getTime() - new Date(a?.createdAt).getTime(),
     );
   }, [tweets, user]);
 
@@ -132,10 +117,7 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
 
   const unreadMessagesCount = messages.length - seenMessagesCount;
   useEffect(() => {
-    localStorage.setItem(
-      "cleared-notifications",
-      JSON.stringify(clearedNotifications),
-    );
+    localStorage.setItem("cleared-notifications", JSON.stringify(clearedNotifications));
   }, [clearedNotifications]);
 
   useEffect(() => {
@@ -219,10 +201,7 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
       const googleToken = cred.credential;
       if (!googleToken) return toast.error(`Google token not found`);
 
-      const { verifyGoogleToken } = await graphqlClient.request(
-        verifyGoogleTokenQuery,
-        { token: googleToken },
-      );
+      const { verifyGoogleToken } = await graphqlClient.request(verifyGoogleTokenQuery, { token: googleToken });
 
       toast.success(`Verified Success`);
       console.log(verifyGoogleToken);
@@ -318,14 +297,11 @@ mt-2 transition-all
 "
                   >
                     <div className="relative">
-                      <span className="text-xl sm:text-2xl md:text-3xl">
-                        {item.icon}
-                      </span>
+                      <span className="text-xl sm:text-2xl md:text-3xl">{item.icon}</span>
 
-                      {item.title === "Notifications" &&
-                        unreadNotificationsCount > 0 && (
-                          <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500 border border-black shadow-[0_0_10px_rgba(239,68,68,0.9)] animate-pulse" />
-                        )}
+                      {item.title === "Notifications" && unreadNotificationsCount > 0 && (
+                        <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500 border border-black shadow-[0_0_10px_rgba(239,68,68,0.9)] animate-pulse" />
+                      )}
 
                       {item.title === "Messages" && unreadMessagesCount > 0 && (
                         <div
@@ -352,9 +328,7 @@ animate-pulse
                       )}
                     </div>
 
-                    <span className="hidden lg:block whitespace-nowrap">
-                      {item.title}
-                    </span>
+                    <span className="hidden lg:block whitespace-nowrap">{item.title}</span>
                   </div>
                 </li>
               ))}
@@ -491,9 +465,7 @@ min-w-0
                   />
                 </span>
 
-                <span className="hidden md:block text-[11px] text-emerald-300">
-                  Active
-                </span>
+                <span className="hidden md:block text-[11px] text-emerald-300">Active</span>
               </div>
             </div>
           )}
@@ -524,25 +496,23 @@ border-l border-r border-gray-700
 
         <div
           className="
-hidden lg:block
-lg:col-span-4
-xl:col-span-3
-
-p-3 xl:p-5
-
-space-y-5
-"
+    col-span-12
+    lg:col-span-4
+    xl:col-span-3
+    p-3 xl:p-5
+    space-y-5
+  "
         >
           {!user ? (
             <div className="p-5 bg-slate-700 rounded-lg">
               <h1 className="my-2 text-2xl">New User 🧰</h1>
 
               <GoogleLogin
-  onSuccess={handleLoginwithGoogle}
-  onError={() => toast.error("Google Login Failed")}
-  useOneTap={false}
-  ux_mode="popup"
-/>
+                onSuccess={handleLoginwithGoogle}
+                onError={() => toast.error("Google Login Failed")}
+                useOneTap={false}
+                ux_mode="popup"
+              />
             </div>
           ) : (
             <div
@@ -650,9 +620,7 @@ text-slate-400
                     </div>
                   ))
                 ) : (
-                  <div className="text-slate-500 text-sm">
-                    No recommendations yet
-                  </div>
+                  <div className="text-slate-500 text-sm">No recommendations yet</div>
                 )}
               </div>
 
@@ -699,9 +667,7 @@ text-transparent
                   Your Followers ({user?.followers?.length || 0})
                 </h1>
 
-                <p className="text-slate-400 text-sm">
-                  Click to view followers list
-                </p>
+                <p className="text-slate-400 text-sm">Click to view followers list</p>
 
                 <div className="mt-4 flex -space-x-3">
                   {user?.followers?.slice(0, 5).map((f) => (
@@ -765,9 +731,7 @@ text-transparent
                   Your Following ({user?.following?.length || 0})
                 </h1>
 
-                <p className="text-slate-400 text-sm">
-                  Click to view following list
-                </p>
+                <p className="text-slate-400 text-sm">Click to view following list</p>
 
                 <div className="mt-4 flex -space-x-3">
                   {user?.following?.slice(0, 5).map((f) => (
@@ -851,13 +815,9 @@ text-transparent
                 <button
                   onClick={() => {
                     const ids =
-                      notifications
-                        ?.map((notification: any) => String(notification?.id))
-                        ?.filter(Boolean) || [];
+                      notifications?.map((notification: any) => String(notification?.id))?.filter(Boolean) || [];
 
-                    setClearedNotifications((prev) => [
-                      ...new Set([...prev, ...ids]),
-                    ]);
+                    setClearedNotifications((prev) => [...new Set([...prev, ...ids])]);
 
                     toast.success("Notifications cleared");
                   }}
@@ -906,10 +866,7 @@ space-y-4
 "
               >
                 {notifications
-                  .filter(
-                    (notification: any) =>
-                      !clearedNotifications.includes(String(notification?.id)),
-                  )
+                  .filter((notification: any) => !clearedNotifications.includes(String(notification?.id)))
                   ?.map((notification: any) => (
                     <div
                       key={`${notification?.type}-${notification?.id}-${notification?.author?.id}`}
@@ -939,30 +896,23 @@ font-semibold
 hover:underline
 "
                         >
-                          {notification?.author?.firstName}{" "}
-                          {notification?.author?.lastName}
+                          {notification?.author?.firstName} {notification?.author?.lastName}
                         </Link>
 
                         <div className="text-xs text-slate-500">
-                          {notification?.createdAt &&
-                          !isNaN(new Date(notification.createdAt).getTime())
-                            ? new Date(notification.createdAt).toLocaleString(
-                                "en-IN",
-                                {
-                                  day: "numeric",
-                                  month: "short",
-                                  hour: "numeric",
-                                  minute: "2-digit",
-                                },
-                              )
+                          {notification?.createdAt && !isNaN(new Date(notification.createdAt).getTime())
+                            ? new Date(notification.createdAt).toLocaleString("en-IN", {
+                                day: "numeric",
+                                month: "short",
+                                hour: "numeric",
+                                minute: "2-digit",
+                              })
                             : "just now"}
                         </div>
                       </div>
 
                       <p className="mt-3 text-slate-300 text-sm">
-                        {notification?.type === "comment"
-                          ? "commented on your tweet:"
-                          : "started following you"}
+                        {notification?.type === "comment" ? "commented on your tweet:" : "started following you"}
                       </p>
 
                       {notification?.type === "comment" ? (
@@ -1002,16 +952,8 @@ text-sm
                   ))}
 
                 {!tweets?.flatMap((tweet: any) =>
-                  tweet?.author?.id === user?.id
-                    ? tweet?.comments?.filter(
-                        (c: any) => c?.author?.id === user?.id,
-                      )
-                    : [],
-                )?.length && (
-                  <div className="text-center text-slate-500 py-10">
-                    No notifications yet
-                  </div>
-                )}
+                  tweet?.author?.id === user?.id ? tweet?.comments?.filter((c: any) => c?.author?.id === user?.id) : [],
+                )?.length && <div className="text-center text-slate-500 py-10">No notifications yet</div>}
               </div>
             </div>
           </div>
@@ -1079,15 +1021,11 @@ text-transparent
                     const ids =
                       tweets?.flatMap((tweet: any) =>
                         tweet?.author?.id === user?.id
-                          ? tweet?.comments
-                              ?.filter((c: any) => c?.author?.id !== user?.id)
-                              ?.map((c: any) => c?.id)
+                          ? tweet?.comments?.filter((c: any) => c?.author?.id !== user?.id)?.map((c: any) => c?.id)
                           : [],
                       ) || [];
 
-                    setClearedMessages((prev) => [
-                      ...new Set([...prev, ...ids]),
-                    ]);
+                    setClearedMessages((prev) => [...new Set([...prev, ...ids])]);
 
                     toast.success("Comments cleared");
                   }}
@@ -1137,10 +1075,7 @@ text-xl
                           }))
                       : [],
                   )
-                  ?.filter(
-                    (comment: any) =>
-                      !clearedMessages.includes(String(comment?.id)),
-                  )
+                  ?.filter((comment: any) => !clearedMessages.includes(String(comment?.id)))
                   ?.map((comment: any) => (
                     <div
                       key={`${comment?.id}-${comment?.author?.id}`}
@@ -1171,41 +1106,28 @@ font-semibold
 hover:underline
 "
                           >
-                            {comment?.tweetAuthor?.firstName}{" "}
-                            {comment?.tweetAuthor?.lastName}
+                            {comment?.tweetAuthor?.firstName} {comment?.tweetAuthor?.lastName}
                           </Link>
 
                           <div className="text-xs text-slate-500">
-                            {comment?.createdAt &&
-                            !isNaN(new Date(comment.createdAt).getTime())
-                              ? new Date(comment.createdAt).toLocaleString(
-                                  "en-IN",
-                                  {
-                                    day: "numeric",
-                                    month: "short",
-                                    hour: "numeric",
-                                    minute: "2-digit",
-                                  },
-                                )
+                            {comment?.createdAt && !isNaN(new Date(comment.createdAt).getTime())
+                              ? new Date(comment.createdAt).toLocaleString("en-IN", {
+                                  day: "numeric",
+                                  month: "short",
+                                  hour: "numeric",
+                                  minute: "2-digit",
+                                })
                               : "just now"}
                           </div>
                         </div>
                       </div>
 
-                      <p className="mt-3 text-slate-300 text-sm leading-relaxed">
-                        {comment?.content}
-                      </p>
+                      <p className="mt-3 text-slate-300 text-sm leading-relaxed">{comment?.content}</p>
                     </div>
                   ))}
 
-                {notifications?.filter(
-                  (notification: any) =>
-                    !clearedNotifications.includes(notification?.id),
-                )?.length === 0 && (
-                  <div className="text-center text-slate-500 py-10">
-                    No comments yet
-                  </div>
-                )}
+                {notifications?.filter((notification: any) => !clearedNotifications.includes(notification?.id))
+                  ?.length === 0 && <div className="text-center text-slate-500 py-10">No comments yet</div>}
               </div>
             </div>
           </div>
