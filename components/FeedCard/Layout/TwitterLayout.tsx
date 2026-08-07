@@ -633,7 +633,7 @@ text-transparent
                   )}
                 </div>
 
-                <p className="mt-3 text-slate-400 text-sm">Click to view all users</p>
+                
               </div>
 
               <div
