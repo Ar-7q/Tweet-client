@@ -730,25 +730,26 @@ text-transparent
                   Your Followers ({user?.followers?.length || 0})
                 </h1>
 
-                
+                <div className="mt-4 flex items-center -space-x-3">
+                  {user?.followers
+                    ?.filter((f) => f?.follower)
+                    .slice(0, 2)
+                    .map((f) => (
+                      <Image
+                        key={f!.follower!.id}
+                        src={f!.follower!.profileImageUrl || "/default-avatar.png"}
+                        alt="followers-preview"
+                        width={32}
+                        height={32}
+                        className="rounded-full border-2 border-black object-cover"
+                      />
+                    ))}
 
-                <div className="mt-4 flex -space-x-3">
-                  {user?.followers?.slice(0, 5).map((f) => (
-                    <Image
-                      key={f?.follower?.id}
-                      src={f?.follower?.profileImageUrl || "/default-avatar.png"}
-                      alt="followers-preview"
-                      width={32}
-                      height={32}
-                      className="
-rounded-full
-
-border-2 border-black
-
-object-cover
-"
-                    />
-                  ))}
+                  {(user?.followers?.filter((f) => f?.follower).length ?? 0) > 2 && (
+                    <div className="ml-2 h-8 w-8 rounded-full bg-sky-500 border-2 border-black flex items-center justify-center text-[10px] font-bold text-white">
+                      +{(user?.followers?.filter((f) => f?.follower).length ?? 0) - 2}
+                    </div>
+                  )}
                 </div>
               </div>
               <div
@@ -798,25 +799,26 @@ text-transparent
                   Your Following ({user?.following?.length || 0})
                 </h1>
 
-                
+                <div className="mt-4 flex items-center -space-x-3">
+                  {user?.following
+                    ?.filter((f) => f?.following)
+                    .slice(0, 2)
+                    .map((f) => (
+                      <Image
+                        key={f!.following!.id}
+                        src={f!.following!.profileImageUrl || "/default-avatar.png"}
+                        alt="following-preview"
+                        width={32}
+                        height={32}
+                        className="rounded-full border-2 border-black object-cover"
+                      />
+                    ))}
 
-                <div className="mt-4 flex -space-x-3">
-                  {user?.following?.slice(0, 5).map((f) => (
-                    <Image
-                      key={f?.following?.id}
-                      src={f?.following?.profileImageUrl || "/default-avatar.png"}
-                      alt="following-preview"
-                      width={45}
-                      height={45}
-                      className="
-rounded-full
-
-border-2 border-black
-
-object-cover
-"
-                    />
-                  ))}
+                  {(user?.following?.filter((f) => f?.following).length ?? 0) > 2 && (
+                    <div className="ml-2 h-8 w-8 rounded-full bg-pink-500 border-2 border-black flex items-center justify-center text-[10px] font-bold text-white">
+                      +{(user?.following?.filter((f) => f?.following).length ?? 0) - 2}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
