@@ -111,8 +111,14 @@ const UserProfilePage = () => {
       await queryClient.invalidateQueries({
         queryKey: ["current-user"],
       });
+
+      await queryClient.refetchQueries({
+        queryKey: ["current-user"],
+      });
+
+      router.refresh();
     },
-    [queryClient],
+    [queryClient, router],
   );
 
   useEffect(() => {
