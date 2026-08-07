@@ -1,7 +1,7 @@
 "use client";
 import { BsBookmarkHeart, BsFillBellFill, BsFillEnvelopeDashFill } from "react-icons/bs";
 
-import { BiHash, BiHomeCircle, BiImageAdd, BiMoney, BiSolidUser } from "react-icons/bi";
+import { BiHash, BiHomeCircle, BiImageAdd, BiMoney, BiSolidKey, BiSolidUser } from "react-icons/bi";
 import { useCurrentUser } from "@/hooks/user";
 import { CgOptions } from "react-icons/cg";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -333,21 +333,6 @@ animate-pulse
                 </li>
               ))}
             </ul>
-
-            {/* Mobile Login Button */}
-            {!user && (
-              <div className="flex justify-center lg:hidden mt-6">
-                <GoogleLogin
-                  onSuccess={handleLoginwithGoogle}
-                  onError={() => toast.error("Google Login Failed")}
-                  useOneTap={false}
-                  ux_mode="popup"
-                  shape="circle"
-                  theme="filled_blue"
-                  size="large"
-                />
-              </div>
-            )}
 
             <div className="mt-5 px-3">
               <div className="mt-5 px-3">{user && <LogoutButton />}</div>
