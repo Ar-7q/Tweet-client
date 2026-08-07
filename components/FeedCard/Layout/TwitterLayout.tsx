@@ -429,8 +429,8 @@ overflow-hidden
           "
                     src={user.profileImageUrl}
                     alt="user-image"
-                    height={56}
-                    width={56}
+                    height={40}
+                    width={40}
                   />
                 </div>
               )}
@@ -730,7 +730,7 @@ text-transparent
                   Your Followers ({user?.followers?.length || 0})
                 </h1>
 
-                <p className="text-slate-400 text-sm">Click to view followers list</p>
+                
 
                 <div className="mt-4 flex -space-x-3">
                   {user?.followers?.slice(0, 5).map((f) => (
@@ -779,7 +779,9 @@ transition-all duration-300
               >
                 <h1
                   className="
-text-2xl
+text-sm
+sm:text-lg
+lg:text-2xl
 
 font-bold
 
@@ -796,7 +798,7 @@ text-transparent
                   Your Following ({user?.following?.length || 0})
                 </h1>
 
-                <p className="text-slate-400 text-sm">Click to view following list</p>
+                
 
                 <div className="mt-4 flex -space-x-3">
                   {user?.following?.slice(0, 5).map((f) => (
