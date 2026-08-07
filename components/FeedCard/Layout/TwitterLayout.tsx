@@ -727,7 +727,7 @@ bg-clip-text
 text-transparent
 "
                 >
-                  Your Followers ({user?.followers?.length || 0})
+                  Followers ({user?.followers?.length || 0})
                 </h1>
 
                 <div className="mt-4 flex items-center -space-x-3">
@@ -796,7 +796,7 @@ bg-clip-text
 text-transparent
 "
                 >
-                  Your Following ({user?.following?.length || 0})
+                  Following ({user?.following?.length || 0})
                 </h1>
 
                 <div className="mt-4 flex items-center -space-x-3">
