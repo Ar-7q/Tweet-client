@@ -504,7 +504,15 @@ border-l border-r border-gray-700
   "
         >
           {!user ? (
-            <div className="p-5 bg-slate-700 rounded-lg">
+            <div
+              className="block
+            lg:sticky
+            lg:top-4
+
+            p-5
+            bg-slate-700
+            rounded-lg"
+            >
               <h1 className="my-2 text-2xl">New User 🧰</h1>
 
               <GoogleLogin
@@ -517,6 +525,8 @@ border-l border-r border-gray-700
           ) : (
             <div
               className="
+               hidden
+            lg:block
 sticky top-4
 max-h-[95vh] overflow-y-auto
 
